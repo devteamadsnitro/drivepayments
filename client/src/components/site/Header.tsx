@@ -1,12 +1,15 @@
 import { Mail, Send } from "lucide-react";
 import { Logo } from "@/components/Brand";
 import { siteConfig } from "@/config/site";
+import { useT } from "@/lib/i18n";
+import { LanguageSwitch } from "./LanguageSwitch";
 
 export function Header() {
+  const t = useT();
   return (
     <header className="sticky top-0 z-40 border-b border-line/80 bg-paper/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <a href="/" className="flex items-center rounded-md" aria-label="DrivePayments · Alta de comercios">
+        <a href="/" className="flex items-center rounded-md" aria-label={t("DrivePayments · Alta de comercios", "DrivePayments · Merchant onboarding")}>
           <Logo />
         </a>
 
@@ -39,17 +42,19 @@ export function Header() {
               <span className="relative inline-flex size-1.5 rounded-full bg-ok" />
             </span>
             <span className="font-mono text-[9.5px] tracking-[0.14em] whitespace-nowrap text-ink-muted uppercase">
-              Alta abierta
+              {t("Alta abierta", "Now onboarding")}
             </span>
           </span>
 
           <a
             href={`mailto:${siteConfig.contact.email}`}
             className="flex size-9 items-center justify-center rounded-full border border-line bg-white/60 text-ink-muted transition-colors hover:text-ink md:hidden"
-            aria-label={`Escríbenos a ${siteConfig.contact.email}`}
+            aria-label={t(`Escríbenos a ${siteConfig.contact.email}`, `Email us at ${siteConfig.contact.email}`)}
           >
             <Mail className="size-4" />
           </a>
+
+          <LanguageSwitch />
         </div>
       </div>
     </header>

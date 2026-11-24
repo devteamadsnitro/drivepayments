@@ -5,6 +5,8 @@
  * datos de contacto, endpoint de recepción y clave pública de cifrado.
  */
 
+import { tr } from "../lib/i18n";
+
 export const siteConfig = {
   brand: {
     name: "DrivePayments",
@@ -21,8 +23,12 @@ export const siteConfig = {
     email: "merchants@drivepayments.com",
     telegramHandle: "@danmanud",
     telegramUrl: "https://t.me/danmanud",
-    hours: "Lun–Vie · 9:00–19:00 CET",
-    replyTime: "Respondemos en menos de 24 h laborables",
+    get hours() {
+      return tr("Lun–Vie · 9:00–19:00 CET", "Mon–Fri · 9:00–19:00 CET");
+    },
+    get replyTime() {
+      return tr("Respondemos en menos de 24 h laborables", "We reply within 24 business hours");
+    },
   },
 
   submission: {
@@ -73,7 +79,9 @@ export const siteConfig = {
   legal: {
     privacyVersion: "24 de noviembre de 2026",
     entity: "DrivePayments",
-    jurisdiction: "España / Estados Unidos",
+    get jurisdiction() {
+      return tr("España / Estados Unidos", "Spain / United States");
+    },
   },
 } as const;
 

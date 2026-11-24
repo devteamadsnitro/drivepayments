@@ -43,6 +43,7 @@ import type {
   ProcessingInfo,
   StepId,
 } from "@/lib/types";
+import { getLang, tr, useLang } from "@/lib/i18n";
 
 const uid = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -126,41 +127,52 @@ const createInitialState = (): ApplicationState => ({
   documents: {},
 });
 
-const stepMeta: Record<StepId, { title: string; description: string; minutes: string }> = {
+const stepMeta = (): Record<StepId, { title: string; description: string; minutes: string }> => ({
   1: {
-    title: "Información del negocio",
-    description:
+    title: tr("Información del negocio", "Business information"),
+    description: tr(
       "Datos legales y de contacto de la empresa. Deben coincidir con el registro y con tu banco.",
+      "The company's legal and contact details. They must match the registration and your bank.",
+    ),
     minutes: "≈ 3 min",
   },
   2: {
-    title: "Información personal de los titulares",
-    description:
+    title: tr("Información personal de los titulares", "Owner information"),
+    description: tr(
       "Cada persona con el 25 % o más de propiedad, además del firmante autorizado. Añade un titular por socio.",
+      "Everyone with 25% or more ownership, plus the authorized signer. Add one owner per partner.",
+    ),
     minutes: "≈ 3 min",
   },
   3: {
-    title: "Datos bancarios del negocio",
-    description:
+    title: tr("Datos bancarios del negocio", "Business bank details"),
+    description: tr(
       "La cuenta donde quieres recibir las liquidaciones. Debe estar a nombre de la razón social.",
+      "The account where you want to receive settlements. It must be in the business's legal name.",
+    ),
     minutes: "≈ 1 min",
   },
   4: {
-    title: "Información de procesamiento",
-    description:
+    title: tr("Información de procesamiento", "Processing information"),
+    description: tr(
       "Con esto dimensionamos tu cuenta y te proponemos las condiciones. Cuanto más exacto, mejor la propuesta.",
+      "This lets us size your account and propose terms. The more accurate, the better the offer.",
+    ),
     minutes: "≈ 2 min",
   },
-};
+});
 
 const INITIAL_STEP: StepId = 1;
 
 function HelpCard() {
   return (
     <div className="mt-4 rounded-2xl border border-line bg-white p-4">
-      <h2 className="text-[13px] font-semibold text-ink">¿Te atascas en algún punto?</h2>
+      <h2 className="text-[13px] font-semibold text-ink">{tr("¿Te atascas en algún punto?", "Stuck on something?")}</h2>
       <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">
-        Escríbenos y lo vemos juntos. Si prefieres, rellenamos el expediente contigo en una llamada.
+        {tr(
+          "Escríbenos y lo vemos juntos. Si prefieres, rellenamos el expediente contigo en una llamada.",
+          "Message us and we'll work through it together. If you prefer, we can fill in the application with you on a call.",
+        )}
       </p>
       <a
         href={siteConfig.contact.telegramUrl}
@@ -184,25 +196,25 @@ function SecurityCard({ fingerprint }: { fingerprint: string }) {
       <div className="flex items-center gap-2">
         <ShieldCheck className="size-3.5 text-accent" aria-hidden="true" />
         <h2 className="font-mono text-[9.5px] tracking-[0.16em] text-paper/70 uppercase">
-          Cómo se tratan tus datos
+          {tr("Cómo se tratan tus datos", "How your data is handled")}
         </h2>
       </div>
       <ul className="mt-3 space-y-2 text-[11px] leading-relaxed text-paper/65">
         <li className="flex gap-1.5">
           <Check className="mt-[2px] size-3 shrink-0 text-accent" />
-          Cifrado AES-256-GCM en tu navegador antes de enviarse.
+          {tr("Cifrado AES-256-GCM en tu navegador antes de enviarse.", "AES-256-GCM encrypted in your browser before it's sent.")}
         </li>
         <li className="flex gap-1.5">
           <Check className="mt-[2px] size-3 shrink-0 text-accent" />
-          Sin borradores guardados en el dispositivo.
+          {tr("Sin borradores guardados en el dispositivo.", "No drafts saved on your device.")}
         </li>
         <li className="flex gap-1.5">
           <Check className="mt-[2px] size-3 shrink-0 text-accent" />
-          Acceso limitado al equipo que tramita el alta.
+          {tr("Acceso limitado al equipo que tramita el alta.", "Access limited to the onboarding team.")}
         </li>
       </ul>
       <p className="mt-3 border-t border-paper/10 pt-2.5 font-mono text-[9px] tracking-[0.08em] text-paper/40 uppercase">
-        Clave pública · {fingerprint}
+        {tr("Clave pública", "Public key")} · {fingerprint}
       </p>
     </div>
   );
@@ -211,6 +223,8 @@ function SecurityCard({ fingerprint }: { fingerprint: string }) {
 export default function Apply() {
   const [state, setState] = React.useState<ApplicationState>(initialState);
   const [step, setStep] = React.useState<StepId>(INITIAL_STEP);
+  const stepRef = React.useRef(step);
+  stepRef.current = step;
   const [maxVisited, setMaxVisited] = React.useState<StepId>(INITIAL_STEP);
   const [errors, setErrors] = React.useState<Errors>({});
   const [formNotice, setFormNotice] = React.useState<string | null>(null);
@@ -219,9 +233,28 @@ export default function Apply() {
   // Estado más reciente para los manejadores asíncronos (la optimización tarda).
   const stateRef = React.useRef(state);
   stateRef.current = state;
+
+  // Al cambiar de idioma, rehace los mensajes de error visibles y descarta los
+  // avisos sueltos (se volverán a mostrar en el idioma nuevo si siguen aplicando).
+  const lang = useLang();
+  const langRef = React.useRef(lang);
+  React.useEffect(() => {
+    if (langRef.current === lang) return;
+    langRef.current = lang;
+    setErrors((current) => {
+      const keys = Object.keys(current);
+      if (keys.length === 0) return current;
+      const fresh = validateStep(stepRef.current, stateRef.current);
+      return Object.fromEntries(keys.filter((key) => fresh[key]).map((key) => [key, fresh[key]]));
+    });
+    setFormNotice(null);
+    setDocError(null);
+  }, [lang]);
   const [mobileDocsOpen, setMobileDocsOpen] = React.useState(false);
   const [status, setStatus] = React.useState<"idle" | "submitting" | "success">("idle");
-  const [progressMessage, setProgressMessage] = React.useState("Preparando el expediente");
+  const [progressMessage, setProgressMessage] = React.useState(() =>
+    tr("Preparando el expediente", "Preparing your application"),
+  );
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [envelope, setEnvelope] = React.useState<EncryptedEnvelope | null>(null);
   const [outcome, setOutcome] = React.useState<DeliveryOutcome | null>(null);
@@ -313,13 +346,15 @@ export default function Apply() {
         const extensionOk = /\.(pdf|jpe?g|png|heic|heif|webp)$/i.test(original.name);
         const mimeOk = !original.type || accepted.includes(original.type);
         if (!extensionOk && !mimeOk) {
-          rejected.push(`${original.name}: formato no admitido`);
+          rejected.push(tr(`${original.name}: formato no admitido`, `${original.name}: unsupported format`));
           continue;
         }
 
         if (!isImageFile(original)) {
           if (original.size > maxFileBytes) {
-            rejected.push(`${original.name}: el PDF supera los ${mb(maxFileBytes)}`);
+            rejected.push(
+              tr(`${original.name}: el PDF supera los ${mb(maxFileBytes)}`, `${original.name}: the PDF exceeds ${mb(maxFileBytes)}`),
+            );
             continue;
           }
           valid.push({ id: uid(), file: original });
@@ -330,8 +365,14 @@ export default function Apply() {
         if (file.size > maxImageBytes) {
           rejected.push(
             undecodable
-              ? `${original.name}: imagen demasiado pesada y este navegador no puede optimizarla. Súbela en JPG o PNG.`
-              : `${original.name}: la imagen sigue superando los ${mb(maxImageBytes)} tras optimizarla`,
+              ? tr(
+                  `${original.name}: imagen demasiado pesada y este navegador no puede optimizarla. Súbela en JPG o PNG.`,
+                  `${original.name}: image too large and this browser can't optimize it. Please upload it as JPG or PNG.`,
+                )
+              : tr(
+                  `${original.name}: la imagen sigue superando los ${mb(maxImageBytes)} tras optimizarla`,
+                  `${original.name}: the image is still over ${mb(maxImageBytes)} after optimization`,
+                ),
           );
           continue;
         }
@@ -345,7 +386,10 @@ export default function Apply() {
     const addedTotal = valid.reduce((sum, item) => sum + item.file.size, 0);
     if (currentTotal + addedTotal > maxTotalBytes) {
       setDocError(
-        `El expediente supera los ${mb(maxTotalBytes)}. Envíanos los documentos restantes por Telegram.`,
+        tr(
+          `El expediente supera los ${mb(maxTotalBytes)}. Envíanos los documentos restantes por Telegram.`,
+          `The application exceeds ${mb(maxTotalBytes)}. Send us the remaining documents via Telegram.`,
+        ),
       );
       return;
     }
@@ -396,7 +440,7 @@ export default function Apply() {
     const nextErrors = validateStep(step, state);
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
-      setFormNotice("Revisa los campos marcados antes de continuar.");
+      setFormNotice(tr("Revisa los campos marcados antes de continuar.", "Please review the highlighted fields before continuing."));
       focusFirstError(nextErrors);
       return;
     }
@@ -438,8 +482,14 @@ export default function Apply() {
       setMaxVisited((current) => (firstInvalid > current ? firstInvalid : current));
       setFormNotice(
         firstInvalid === 4
-          ? "Falta aceptar el tratamiento de datos o completar el perfil de procesamiento."
-          : `Faltan datos obligatorios en el paso ${firstInvalid}.`,
+          ? tr(
+              "Falta aceptar el tratamiento de datos o completar el perfil de procesamiento.",
+              "You still need to accept the data processing terms or complete the processing profile.",
+            )
+          : tr(
+              `Faltan datos obligatorios en el paso ${firstInvalid}.`,
+              `Required information is missing in step ${firstInvalid}.`,
+            ),
       );
       focusFirstError(nextErrors);
       return;
@@ -447,7 +497,7 @@ export default function Apply() {
 
     setStatus("submitting");
     setSubmitError(null);
-    setProgressMessage("Preparando el expediente");
+    setProgressMessage(tr("Preparando el expediente", "Preparing your application"));
 
     try {
       const { envelope: nextEnvelope, outcome: nextOutcome } = await submitApplication(
@@ -464,7 +514,7 @@ export default function Apply() {
       setSubmitError(
         error instanceof Error
           ? error.message
-          : "No se pudo completar el envío. Vuelve a intentarlo.",
+          : tr("No se pudo completar el envío. Vuelve a intentarlo.", "The submission couldn't be completed. Please try again."),
       );
     }
   };
@@ -486,7 +536,7 @@ export default function Apply() {
 
   const requiredDocs = countRequiredFulfilled(state);
   const documentCount = countDocuments(state);
-  const meta = stepMeta[step];
+  const meta = stepMeta()[step];
 
   return (
     <div className="flex min-h-dvh flex-col bg-paper">
@@ -511,30 +561,32 @@ export default function Apply() {
                 <div className="flex flex-col gap-4">
                   <p className="eyebrow flex items-center gap-2">
                     <span className="inline-block size-1.5 bg-accent-deep" aria-hidden="true" />
-                    Alta de comercio · Expediente {reference}
+                    {tr("Alta de comercio · Expediente", "Merchant onboarding · Application")} {reference}
                   </p>
                   <h1 className="max-w-[19ch] text-[clamp(2.1rem,5.2vw,3.5rem)] leading-[0.98] font-semibold tracking-[-0.045em] text-ink">
-                    Abre tu cuenta de comercio en cuatro pasos.
+                    {tr("Abre tu cuenta de comercio en cuatro pasos.", "Open your merchant account in four steps.")}
                   </h1>
                   <p className="max-w-xl text-[14.5px] leading-relaxed text-ink-muted sm:text-[15.5px]">
-                    Rellenamos el expediente contigo y lo presentamos al procesador. Cuanto más
-                    completo llegue, antes recibes el alta y las condiciones finales.
+                    {tr(
+                      "Rellenamos el expediente contigo y lo presentamos al procesador. Cuanto más completo llegue, antes recibes el alta y las condiciones finales.",
+                      "We complete the application with you and submit it to the processor. The more complete it is, the sooner you're approved and get final terms.",
+                    )}
                   </p>
                   <div className="mt-1 flex flex-wrap items-center gap-x-5 gap-y-2.5">
                     <span className="inline-flex items-center gap-1.5 text-[12px] text-ink-muted">
-                      <Clock className="size-3.5" aria-hidden="true" />≈ 8 minutos
+                      <Clock className="size-3.5" aria-hidden="true" />{tr("≈ 8 minutos", "≈ 8 minutes")}
                     </span>
                     <span className="inline-flex items-center gap-1.5 text-[12px] text-ink-muted">
                       <Lock className="size-3.5" aria-hidden="true" />
-                      Cifrado en tu navegador
+                      {tr("Cifrado en tu navegador", "Encrypted in your browser")}
                     </span>
                     <span className="inline-flex items-center gap-1.5 text-[12px] text-ink-muted">
                       <Sparkles className="size-3.5" aria-hidden="true" />
-                      Revisión en 24–48 h
+                      {tr("Revisión en 24–48 h", "Reviewed in 24–48 h")}
                     </span>
                     <span className="inline-flex items-center gap-1.5 text-[12px] text-ink-muted">
                       <Check className="size-3.5" aria-hidden="true" />
-                      Sin coste ni compromiso
+                      {tr("Sin coste ni compromiso", "No cost, no commitment")}
                     </span>
                   </div>
                 </div>
@@ -558,7 +610,7 @@ export default function Apply() {
                       <div className="flex items-start justify-between gap-4 border-b border-line pb-5">
                         <div>
                           <p className="font-mono text-[10px] tracking-[0.16em] text-ink-muted uppercase">
-                            Paso 0{step} / 04
+                            {tr("Paso", "Step")} 0{step} / 04
                           </p>
                           <h2 className="mt-1.5 text-[21px] leading-tight font-semibold tracking-[-0.03em] text-ink sm:text-[24px]">
                             {meta.title}
@@ -623,29 +675,29 @@ export default function Apply() {
                         <div className="mt-8 flex flex-col gap-4">
                           <div className="rounded-xl border border-line bg-paper/60 p-4">
                             <p className="font-mono text-[9.5px] tracking-[0.16em] text-ink-muted uppercase">
-                              Resumen del expediente
+                              {tr("Resumen del expediente", "Application summary")}
                             </p>
                             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
                               {[
                                 {
-                                  label: "Negocio",
+                                  label: tr("Negocio", "Business"),
                                   value:
                                     state.business.dbaName || state.business.legalName || "—",
                                 },
-                                { label: "Titulares", value: String(state.owners.length) },
+                                { label: tr("Titulares", "Owners"), value: String(state.owners.length) },
                                 {
-                                  label: "Documentos",
+                                  label: tr("Documentos", "Documents"),
                                   value: `${documentCount} · ${requiredDocs.done}/${requiredDocs.total}`,
                                 },
                                 {
-                                  label: "Método",
+                                  label: tr("Método", "Method"),
                                   value:
                                     state.processing.methods === "cards"
-                                      ? "Tarjetas"
+                                      ? tr("Tarjetas", "Cards")
                                       : state.processing.methods === "ach"
                                         ? "ACH"
                                         : state.processing.methods === "both"
-                                          ? "Tarjetas + ACH"
+                                          ? tr("Tarjetas + ACH", "Cards + ACH")
                                           : "—",
                                 },
                               ].map((item) => (
@@ -670,17 +722,19 @@ export default function Apply() {
                             }}
                             error={errors["consent"]}
                           >
-                            He leído y acepto la{" "}
+                            {tr("He leído y acepto la", "I have read and accept the")}{" "}
                             <a
-                              href="/privacidad"
+                              href={getLang() === "en" ? "/privacy" : "/privacidad"}
                               target="_blank"
                               rel="noreferrer"
                               className="link-underline font-medium text-ink"
                             >
-                              política de privacidad
+                              {tr("política de privacidad", "privacy policy")}
                             </a>{" "}
-                            y autorizo a DrivePayments a tratar estos datos y los documentos adjuntos para
-                            tramitar el alta con el procesador y el banco adquirente.
+                            {tr(
+                              "y autorizo a DrivePayments a tratar estos datos y los documentos adjuntos para tramitar el alta con el procesador y el banco adquirente.",
+                              "and authorize DrivePayments to process this data and the attached documents to complete onboarding with the processor and the acquiring bank.",
+                            )}
                           </CheckboxLine>
                         </div>
                       ) : null}
@@ -693,14 +747,14 @@ export default function Apply() {
                           className="inline-flex h-11 items-center justify-center gap-1.5 self-start rounded-xl border border-line px-3.5 text-[13px] font-medium text-ink transition-colors hover:border-ink disabled:cursor-not-allowed disabled:opacity-40 sm:self-auto"
                         >
                           <ArrowLeft className="size-3.5" />
-                          Atrás
+                          {tr("Atrás", "Back")}
                         </button>
 
                         <div className="flex items-center gap-3">
                           <span className="hidden text-[11px] text-ink-muted sm:block">
                             {step === 4
-                              ? "Revisa el resumen antes de enviar"
-                              : "Puedes volver atrás sin perder lo introducido"}
+                              ? tr("Revisa el resumen antes de enviar", "Review the summary before submitting")
+                              : tr("Puedes volver atrás sin perder lo introducido", "You can go back without losing what you've entered")}
                           </span>
                           {step < 4 ? (
                             <button
@@ -708,7 +762,7 @@ export default function Apply() {
                               onClick={goNext}
                               className="group inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-ink px-5 text-[13.5px] font-medium text-paper transition-colors hover:bg-ink-soft sm:flex-none"
                             >
-                              Continuar
+                              {tr("Continuar", "Continue")}
                               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                             </button>
                           ) : (
@@ -718,7 +772,7 @@ export default function Apply() {
                               className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-accent px-5 text-[13.5px] font-semibold text-ink transition-all hover:bg-accent-deep disabled:opacity-70 sm:flex-none"
                             >
                               <Lock className="size-3.5" />
-                              Enviar solicitud
+                              {tr("Enviar solicitud", "Submit application")}
                             </button>
                           )}
                         </div>
@@ -734,8 +788,10 @@ export default function Apply() {
                             {progressMessage}
                           </p>
                           <p className="max-w-xs text-center text-[11.5px] leading-relaxed text-ink-muted">
-                            No cierres esta pestaña. Los datos y los documentos se están cifrando en
-                            tu dispositivo.
+                            {tr(
+                              "No cierres esta pestaña. Los datos y los documentos se están cifrando en tu dispositivo.",
+                              "Don't close this tab. Your data and documents are being encrypted on your device.",
+                            )}
                           </p>
                         </div>
                       ) : null}
@@ -743,9 +799,9 @@ export default function Apply() {
 
                     <div className="mt-4 grid gap-2 sm:grid-cols-3">
                       {[
-                        { icon: Lock, text: "Cifrado AES-256-GCM en el navegador" },
-                        { icon: ShieldCheck, text: "Sin borradores en este dispositivo" },
-                        { icon: Check, text: "Revisión humana del expediente" },
+                        { icon: Lock, text: tr("Cifrado AES-256-GCM en el navegador", "AES-256-GCM encryption in the browser") },
+                        { icon: ShieldCheck, text: tr("Sin borradores en este dispositivo", "No drafts on this device") },
+                        { icon: Check, text: tr("Revisión humana del expediente", "Human review of every application") },
                       ].map((item) => (
                         <div
                           key={item.text}
@@ -771,7 +827,8 @@ export default function Apply() {
                         {requiredDocs.done}
                       </span>
                       <span className="text-[12.5px] font-medium text-ink">
-                        Documentos · {requiredDocs.done}/{requiredDocs.total} obligatorios
+                        {tr("Documentos", "Documents")} · {requiredDocs.done}/{requiredDocs.total}{" "}
+                        {tr("obligatorios", "required")}
                       </span>
                     </span>
                     <ChevronDown

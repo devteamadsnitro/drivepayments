@@ -1,3 +1,4 @@
+import { tr } from "@/lib/i18n";
 const DELIMITER = "#8a8f96";
 
 function TransitMark({ x }: { x: number }) {
@@ -35,7 +36,7 @@ export function CheckSample() {
       <svg
         viewBox="0 0 720 300"
         role="img"
-        aria-label="Cheque de ejemplo con el routing number, el número de cuenta y el número de cheque señalados en la franja inferior"
+        aria-label={tr("Cheque de ejemplo con el routing number, el número de cuenta y el número de cheque señalados en la franja inferior", "Sample check with the routing number, account number and check number marked along the bottom line")}
         className="w-full"
       >
         <rect x="20" y="16" width="680" height="268" rx="12" fill="#ffffff" stroke="#e2ded3" />
@@ -69,7 +70,7 @@ export function CheckSample() {
           fontSize="8.5"
           fill="#5c626b"
         >
-          Nº 1024
+          {tr("Nº 1024", "No. 1024")}
         </text>
         <text
           x="672"
@@ -91,7 +92,7 @@ export function CheckSample() {
           letterSpacing="1.2"
           fill="#8a8f96"
         >
-          PÁGUESE A LA ORDEN DE
+          {tr("PÁGUESE A LA ORDEN DE", "PAY TO THE ORDER OF")}
         </text>
         <text
           x="48"
@@ -127,7 +128,7 @@ export function CheckSample() {
           fontSize="8"
           fill="#5c626b"
         >
-          CONCEPTO: liquidación semanal · marzo
+          {tr("CONCEPTO: liquidación semanal · marzo", "MEMO: weekly settlement · March")}
         </text>
         <line x1="540" y1="166" x2="672" y2="166" stroke="#c8c2b2" strokeWidth="1" />
         <text
@@ -138,7 +139,7 @@ export function CheckSample() {
           fontSize="7"
           fill="#8a8f96"
         >
-          Firma autorizada
+          {tr("Firma autorizada", "Authorized signature")}
         </text>
         <text
           x="672"
@@ -149,7 +150,7 @@ export function CheckSample() {
           letterSpacing="1.2"
           fill="#b8b2a4"
         >
-          MUESTRA · NO VÁLIDO
+          {tr("MUESTRA · NO VÁLIDO", "SAMPLE · VOID")}
         </text>
 
         {/* Franja MICR */}
@@ -202,8 +203,8 @@ export function CheckSample() {
       <figcaption className="mt-3 grid gap-2 sm:grid-cols-3">
         {[
           { n: 1, title: "Routing number", value: "121000248" },
-          { n: 2, title: "Número de cuenta", value: "000123456789" },
-          { n: 3, title: "Número de cheque", value: "1024" },
+          { n: 2, title: tr("Número de cuenta", "Account number"), value: "000123456789" },
+          { n: 3, title: tr("Número de cheque", "Check number"), value: "1024" },
         ].map((item) => (
           <div key={item.n} className="flex items-start gap-2">
             <span className="mt-[1px] flex size-5 shrink-0 items-center justify-center rounded-full bg-ink font-mono text-[10px] font-semibold text-accent">

@@ -1,12 +1,13 @@
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { StepId } from "@/lib/types";
+import { tr } from "@/lib/i18n";
 
-const steps: { id: StepId; label: string; short: string }[] = [
-  { id: 1, label: "El negocio", short: "Negocio" },
-  { id: 2, label: "Los titulares", short: "Titulares" },
-  { id: 3, label: "La cuenta", short: "Banco" },
-  { id: 4, label: "Procesamiento", short: "Proceso" },
+const getSteps = (): { id: StepId; label: string; short: string }[] => [
+  { id: 1, label: tr("El negocio", "Business"), short: tr("Negocio", "Business") },
+  { id: 2, label: tr("Los titulares", "Owners"), short: tr("Titulares", "Owners") },
+  { id: 3, label: tr("La cuenta", "Bank account"), short: tr("Banco", "Bank") },
+  { id: 4, label: tr("Procesamiento", "Processing"), short: tr("Proceso", "Processing") },
 ];
 
 export function Progress({
@@ -18,16 +19,17 @@ export function Progress({
   maxVisited: StepId;
   onNavigate: (step: StepId) => void;
 }) {
+  const steps = getSteps();
   const pct = Math.round(((step - 1) / (steps.length - 1)) * 100);
 
   return (
     <div className="rounded-2xl border border-line bg-white/80 px-4 py-4 shadow-[0_1px_2px_rgba(11,14,18,0.03)] backdrop-blur sm:px-5">
       <div className="flex items-baseline justify-between gap-3">
         <span className="font-mono text-[10px] tracking-[0.16em] text-ink-muted uppercase">
-          Paso {step} de {steps.length} — {steps[step - 1].label}
+          {tr("Paso", "Step")} {step} {tr("de", "of")} {steps.length} — {steps[step - 1].label}
         </span>
         <span className="font-mono text-[10px] tracking-[0.12em] text-ink-muted uppercase">
-          {pct}% completado
+          {pct}% {tr("completado", "complete")}
         </span>
       </div>
 
@@ -54,7 +56,7 @@ export function Progress({
                   disabled={!reachable}
                   onClick={() => reachable && onNavigate(item.id)}
                   aria-current={current ? "step" : undefined}
-                  aria-label={`Ir al paso ${item.id}: ${item.label}`}
+                  aria-label={tr(`Ir al paso ${item.id}: ${item.label}`, `Go to step ${item.id}: ${item.label}`)}
                   className={cn(
                     "flex size-[20px] items-center justify-center rounded-full border transition-all duration-300",
                     done && "border-ink bg-ink text-accent",

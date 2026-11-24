@@ -1,6 +1,7 @@
 import * as React from "react";
 import { AlertCircle, Check, ChevronDown, Globe, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/i18n";
 
 /* ------------------------------------------------------------------ */
 /* Estructuras                                                         */
@@ -213,7 +214,7 @@ export function Select({
   value,
   onChange,
   options,
-  placeholder = "Selecciona…",
+  placeholder = tr("Selecciona…", "Select…"),
   error,
   id,
   disabled,
@@ -324,7 +325,7 @@ export function YesNo({
   value,
   onChange,
   error,
-  labels = ["Sí", "No"],
+  labels = [tr("Sí", "Yes"), "No"],
 }: {
   id?: string;
   value: string;
@@ -415,9 +416,9 @@ export function Combobox({
   value,
   onChange,
   options,
-  placeholder = "Buscar…",
+  placeholder = tr("Buscar…", "Search…"),
   error,
-  emptyMessage = "Sin resultados. Prueba con otra palabra.",
+  emptyMessage = tr("Sin resultados. Prueba con otra palabra.", "No results. Try another word."),
 }: {
   id?: string;
   value: string;
@@ -593,7 +594,7 @@ export function YearsMonths({
             className="field-input h-11 pr-12"
           />
           <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 font-mono text-[10px] tracking-wide text-ink-muted uppercase">
-            años
+            {tr("años", "years")}
           </span>
         </div>
         <div className="relative w-full max-w-[132px]">
@@ -608,7 +609,7 @@ export function YearsMonths({
             className="field-input h-11 pr-14"
           />
           <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 font-mono text-[10px] tracking-wide text-ink-muted uppercase">
-            meses
+            {tr("meses", "months")}
           </span>
         </div>
       </div>
@@ -662,7 +663,7 @@ export function WebsiteList({
               <input
                 id={`business.websites.${index}`}
                 value={value}
-                placeholder="midominio.com"
+                placeholder={tr("midominio.com", "mydomain.com")}
                 onChange={(event) => update(index, event.target.value)}
                 aria-invalid={errors[index] ? true : undefined}
                 className="field-input h-11 pl-9"
@@ -673,7 +674,7 @@ export function WebsiteList({
                 type="button"
                 onClick={() => onChange(values.filter((_, i) => i !== index))}
                 className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-line text-ink-muted transition-colors hover:border-danger/40 hover:text-danger"
-                aria-label={`Eliminar web ${index + 1}`}
+                aria-label={tr(`Eliminar web ${index + 1}`, `Remove website ${index + 1}`)}
               >
                 <Trash2 className="size-3.5" />
               </button>
@@ -692,7 +693,7 @@ export function WebsiteList({
         className="mt-0.5 inline-flex w-fit items-center gap-1.5 rounded-lg border border-dashed border-line-strong px-3 py-1.5 text-[12px] font-medium text-ink transition-colors hover:border-ink hover:bg-white"
       >
         <Plus className="size-3" />
-        Añadir otra web
+        {tr("Añadir otra web", "Add another website")}
       </button>
     </div>
   );

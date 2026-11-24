@@ -12,6 +12,7 @@ import { idTypes, usStates } from "@/lib/options";
 import { formatPhone, formatSsn, totalOwnership } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 import type { Errors, Owner } from "@/lib/types";
+import { tr } from "@/lib/i18n";
 
 const today = new Date();
 const maxBirthDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate())
@@ -47,7 +48,8 @@ export function Step2Owners({
         <div className="flex items-center gap-2">
           <UserRound className="size-3.5 text-ink-muted" aria-hidden="true" />
           <p className="text-[12.5px] text-ink">
-            {owners.length} {owners.length === 1 ? "titular" : "titulares"} · propiedad declarada{" "}
+            {owners.length} {owners.length === 1 ? tr("titular", "owner") : tr("titulares", "owners")} ·{" "}
+            {tr("propiedad declarada", "declared ownership")}{" "}
             <span className={cn("font-semibold", totalOk ? "text-ok" : "text-ink")}>
               {Math.round(total)} %
             </span>
@@ -89,10 +91,10 @@ export function Step2Owners({
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <h3 id={`owner-${owner.id}-title`} className="text-[13.5px] font-semibold text-ink">
-                  Titular {index + 1}
+                  {tr("Titular", "Owner")} {index + 1}
                   {index === 0 ? (
                     <span className="ml-2 font-mono text-[9px] tracking-[0.1em] text-ink-muted uppercase">
-                      principal
+                      {tr("principal", "primary")}
                     </span>
                   ) : null}
                 </h3>
@@ -104,7 +106,7 @@ export function Step2Owners({
                   className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-ink-muted transition-colors hover:bg-danger-soft hover:text-danger"
                 >
                   <Trash2 className="size-3" />
-                  Eliminar
+                  {tr("Eliminar", "Remove")}
                 </button>
               ) : null}
             </header>
@@ -113,7 +115,7 @@ export function Step2Owners({
               <Grid>
                 <Field
                   id={key("firstName")}
-                  label="Nombre"
+                  label={tr("Nombre", "First name")}
                   required
                   error={errors[key("firstName")]}
                 >
@@ -121,14 +123,14 @@ export function Step2Owners({
                     id={key("firstName")}
                     value={owner.firstName}
                     onChange={(value) => updateOwner(owner.id, { firstName: value })}
-                    placeholder="Nombre"
+                    placeholder={tr("Nombre", "First name")}
                     autoComplete="given-name"
                     error={Boolean(errors[key("firstName")])}
                   />
                 </Field>
                 <Field
                   id={key("lastName")}
-                  label="Apellidos"
+                  label={tr("Apellidos", "Last name")}
                   required
                   error={errors[key("lastName")]}
                 >
@@ -136,7 +138,7 @@ export function Step2Owners({
                     id={key("lastName")}
                     value={owner.lastName}
                     onChange={(value) => updateOwner(owner.id, { lastName: value })}
-                    placeholder="Apellidos"
+                    placeholder={tr("Apellidos", "Last name")}
                     autoComplete="family-name"
                     error={Boolean(errors[key("lastName")])}
                   />
@@ -144,7 +146,7 @@ export function Step2Owners({
 
                 <Field
                   id={key("addressMode")}
-                  label="¿Dirección personal igual que la del negocio?"
+                  label={tr("¿Dirección personal igual que la del negocio?", "Is your home address the same as the business's?")}
                   required
                   error={errors[key("addressMode")]}
                   className="sm:col-span-2"
@@ -157,8 +159,8 @@ export function Step2Owners({
                     }
                     options={[
                       { value: "no", label: "No, es otra" },
-                      { value: "legal", label: "Igual que la legal" },
-                      { value: "dba", label: "Igual que el DBA" },
+                      { value: "legal", label: tr("Igual que la legal", "Same as legal address") },
+                      { value: "dba", label: tr("Igual que el DBA", "Same as DBA address") },
                     ]}
                     error={Boolean(errors[key("addressMode")])}
                   />
@@ -170,7 +172,7 @@ export function Step2Owners({
                   <Grid>
                     <Field
                       id={key("country")}
-                      label="País"
+                      label={tr("País", "Country")}
                       error={errors[key("country")]}
                     >
                       <Select
@@ -178,24 +180,24 @@ export function Step2Owners({
                         value={owner.country}
                         onChange={(value) => updateOwner(owner.id, { country: value })}
                         options={[
-                          { value: "US", label: "Estados Unidos" },
-                          { value: "ES", label: "España" },
-                          { value: "MX", label: "México" },
-                          { value: "CA", label: "Canadá" },
-                          { value: "GB", label: "Reino Unido" },
+                          { value: "US", label: tr("Estados Unidos", "United States") },
+                          { value: "ES", label: tr("España", "Spain") },
+                          { value: "MX", label: tr("México", "Mexico") },
+                          { value: "CA", label: tr("Canadá", "Canada") },
+                          { value: "GB", label: tr("Reino Unido", "United Kingdom") },
                           { value: "AR", label: "Argentina" },
                           { value: "CO", label: "Colombia" },
                           { value: "CL", label: "Chile" },
-                          { value: "PE", label: "Perú" },
-                          { value: "BR", label: "Brasil" },
-                          { value: "OTHER", label: "Otro país" },
+                          { value: "PE", label: tr("Perú", "Peru") },
+                          { value: "BR", label: tr("Brasil", "Brazil") },
+                          { value: "OTHER", label: tr("Otro país", "Other country") },
                         ]}
-                        placeholder="País de residencia"
+                        placeholder={tr("País de residencia", "Country of residence")}
                       />
                     </Field>
                     <Field
                       id={key("address")}
-                      label="Dirección"
+                      label={tr("Dirección", "Address")}
                       required
                       error={errors[key("address")]}
                     >
@@ -203,24 +205,24 @@ export function Step2Owners({
                         id={key("address")}
                         value={owner.address}
                         onChange={(value) => updateOwner(owner.id, { address: value })}
-                        placeholder="Calle, número, piso"
+                        placeholder={tr("Calle, número, piso", "Street, number, unit")}
                         autoComplete="street-address"
                         error={Boolean(errors[key("address")])}
                       />
                     </Field>
-                    <Field id={key("city")} label="Ciudad" required error={errors[key("city")]}>
+                    <Field id={key("city")} label={tr("Ciudad", "City")} required error={errors[key("city")]}>
                       <TextInput
                         id={key("city")}
                         value={owner.city}
                         onChange={(value) => updateOwner(owner.id, { city: value })}
-                        placeholder="Ciudad"
+                        placeholder={tr("Ciudad", "City")}
                         autoComplete="address-level2"
                         error={Boolean(errors[key("city")])}
                       />
                     </Field>
                     <Field
                       id={key("state")}
-                      label="Estado / provincia"
+                      label={tr("Estado / provincia", "State / province")}
                       required
                       error={errors[key("state")]}
                     >
@@ -230,7 +232,7 @@ export function Step2Owners({
                           value={owner.state}
                           onChange={(value) => updateOwner(owner.id, { state: value })}
                           options={usStates}
-                          placeholder="Selecciona el estado"
+                          placeholder={tr("Selecciona el estado", "Select the state")}
                           error={Boolean(errors[key("state")])}
                         />
                       ) : (
@@ -238,17 +240,17 @@ export function Step2Owners({
                           id={key("state")}
                           value={owner.state}
                           onChange={(value) => updateOwner(owner.id, { state: value })}
-                          placeholder="Estado o provincia"
+                          placeholder={tr("Estado o provincia", "State or province")}
                           error={Boolean(errors[key("state")])}
                         />
                       )}
                     </Field>
-                    <Field id={key("zip")} label="Código postal" required error={errors[key("zip")]}>
+                    <Field id={key("zip")} label={tr("Código postal", "ZIP / postal code")} required error={errors[key("zip")]}>
                       <TextInput
                         id={key("zip")}
                         value={owner.zip}
                         onChange={(value) => updateOwner(owner.id, { zip: value })}
-                        placeholder="Código postal"
+                        placeholder={tr("Código postal", "ZIP / postal code")}
                         autoComplete="postal-code"
                         error={Boolean(errors[key("zip")])}
                       />
@@ -260,7 +262,7 @@ export function Step2Owners({
               <Grid>
                 <Field
                   id={key("yearsAtResidence")}
-                  label="Tiempo en la residencia actual"
+                  label={tr("Tiempo en la residencia actual", "Time at current residence")}
                   required
                   className="sm:col-span-2"
                 >
@@ -278,7 +280,7 @@ export function Step2Owners({
 
                 <Field
                   id={key("idType")}
-                  label="Tipo de documento"
+                  label={tr("Tipo de documento", "ID type")}
                   required
                   error={errors[key("idType")]}
                 >
@@ -287,13 +289,13 @@ export function Step2Owners({
                     value={owner.idType}
                     onChange={(value) => updateOwner(owner.id, { idType: value })}
                     options={idTypes}
-                    placeholder="Selecciona el documento"
+                    placeholder={tr("Selecciona el documento", "Select the ID")}
                     error={Boolean(errors[key("idType")])}
                   />
                 </Field>
                 <Field
                   id={key("idNumber")}
-                  label="Número de documento"
+                  label={tr("Número de documento", "ID number")}
                   required
                   error={errors[key("idNumber")]}
                 >
@@ -301,7 +303,7 @@ export function Step2Owners({
                     id={key("idNumber")}
                     value={owner.idNumber}
                     onChange={(value) => updateOwner(owner.id, { idNumber: value })}
-                    placeholder="Número del documento"
+                    placeholder={tr("Número del documento", "ID number")}
                     error={Boolean(errors[key("idNumber")])}
                   />
                 </Field>
@@ -311,7 +313,7 @@ export function Step2Owners({
                   label="SSN"
                   required
                   error={errors[key("ssn")]}
-                  hint="Nueve dígitos. Se cifra en tu navegador."
+                  hint={tr("Nueve dígitos. Se cifra en tu navegador.", "Nine digits. Encrypted in your browser.")}
                 >
                   <div className="relative">
                     <TextInput
@@ -330,7 +332,7 @@ export function Step2Owners({
                       onClick={() =>
                         setRevealed((current) => ({ ...current, [owner.id]: !current[owner.id] }))
                       }
-                      aria-label={showSsn ? "Ocultar SSN" : "Mostrar SSN"}
+                      aria-label={showSsn ? tr("Ocultar SSN", "Hide SSN") : tr("Mostrar SSN", "Show SSN")}
                       className="absolute top-1/2 right-2.5 -translate-y-1/2 text-ink-muted transition-colors hover:text-ink"
                     >
                       {showSsn ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -340,7 +342,7 @@ export function Step2Owners({
 
                 <Field
                   id={key("dob")}
-                  label="Fecha de nacimiento"
+                  label={tr("Fecha de nacimiento", "Date of birth")}
                   required
                   error={errors[key("dob")]}
                 >
@@ -357,7 +359,7 @@ export function Step2Owners({
 
                 <Field
                   id={key("phone")}
-                  label="Teléfono personal"
+                  label={tr("Teléfono personal", "Personal phone")}
                   required
                   error={errors[key("phone")]}
                 >
@@ -374,7 +376,7 @@ export function Step2Owners({
 
                 <Field
                   id={key("email")}
-                  label="Email personal"
+                  label={tr("Email personal", "Personal email")}
                   required
                   error={errors[key("email")]}
                 >
@@ -383,7 +385,7 @@ export function Step2Owners({
                     type="email"
                     value={owner.email}
                     onChange={(value) => updateOwner(owner.id, { email: value })}
-                    placeholder="nombre@email.com"
+                    placeholder={tr("nombre@email.com", "name@email.com")}
                     autoComplete="email"
                     error={Boolean(errors[key("email")])}
                   />
@@ -391,7 +393,7 @@ export function Step2Owners({
 
                 <Field
                   id={key("ownershipPct")}
-                  label="% de propiedad"
+                  label={tr("% de propiedad", "Ownership %")}
                   required
                   error={errors[key("ownershipPct")]}
                   className="sm:col-span-2 sm:max-w-[220px]"
@@ -424,13 +426,14 @@ export function Step2Owners({
         <span className="flex size-5 items-center justify-center rounded-full border border-line-strong transition-colors group-hover:border-ink group-hover:bg-ink group-hover:text-accent">
           <Plus className="size-3" />
         </span>
-        Añadir titular
+        {tr("Añadir titular", "Add owner")}
       </button>
 
       <p className="text-[11.5px] leading-relaxed text-ink-muted">
-        Deben figurar todas las personas con el 25 % o más de propiedad, además del firmante
-        autorizado. Si un socio supera el 25 %, el procesador pedirá también su documento de
-        identidad.
+        {tr(
+          "Deben figurar todas las personas con el 25 % o más de propiedad, además del firmante autorizado. Si un socio supera el 25 %, el procesador pedirá también su documento de identidad.",
+          "List everyone with 25% or more ownership, plus the authorized signer. If a partner holds more than 25%, the processor will also ask for their ID.",
+        )}
       </p>
     </div>
   );

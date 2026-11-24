@@ -4,6 +4,7 @@ import { documentRequirements } from "@/lib/options";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import type { DocumentMap } from "@/lib/types";
+import { tr } from "@/lib/i18n";
 
 const formatBytes = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -49,7 +50,7 @@ export function DocumentPanel({
             Documentos
           </h2>
           <p className="mt-0.5 text-[11px] text-ink-muted">
-            Disponible en los cuatro pasos
+            {tr("Disponible en los cuatro pasos", "Available in all four steps")}
           </p>
         </div>
         <span
@@ -89,12 +90,13 @@ export function DocumentPanel({
           )}
         >
           <Upload className="size-4 text-ink-muted" aria-hidden="true" />
-          <p className="mt-2 text-[12px] font-medium text-ink">Arrastra aquí tus archivos</p>
+          <p className="mt-2 text-[12px] font-medium text-ink">{tr("Arrastra aquí tus archivos", "Drag your files here")}</p>
           <p className="mt-0.5 text-[10.5px] leading-snug text-ink-muted">
-            o usa «Adjuntar» en cada documento
+            {tr("o usa «Adjuntar» en cada documento", "or use “Attach” on each document")}
           </p>
           <p className="mt-2 font-mono text-[9px] tracking-[0.08em] text-ink-muted/80 uppercase">
-            PDF máx. {siteConfig.submission.maxFileBytes / (1024 * 1024)} MB · fotos optimizadas automáticamente
+            {tr("PDF máx.", "PDF max")} {siteConfig.submission.maxFileBytes / (1024 * 1024)} MB ·{" "}
+            {tr("fotos optimizadas automáticamente", "photos optimized automatically")}
           </p>
           <input
             ref={zoneInputRef}
@@ -102,7 +104,7 @@ export function DocumentPanel({
             multiple
             accept={siteConfig.submission.acceptedExtensions}
             className="sr-only"
-            aria-label="Añadir documentos adicionales"
+            aria-label={tr("Añadir documentos adicionales", "Add additional documents")}
             onChange={(event) => {
               if (event.target.files?.length) onAdd("other", event.target.files);
               event.target.value = "";
@@ -119,7 +121,7 @@ export function DocumentPanel({
               className="size-3 animate-spin rounded-full border-2 border-line border-t-ink"
               aria-hidden="true"
             />
-            Optimizando imágenes…
+            {tr("Optimizando imágenes…", "Optimizing images…")}
           </p>
         ) : null}
 
@@ -133,7 +135,7 @@ export function DocumentPanel({
             <button
               type="button"
               onClick={onDismissError}
-              aria-label="Descartar aviso"
+              aria-label={tr("Descartar aviso", "Dismiss notice")}
               className="text-danger/70 hover:text-danger"
             >
               <X className="size-3" />
@@ -179,12 +181,12 @@ export function DocumentPanel({
                     <p className="flex flex-wrap items-center gap-x-1.5 text-[12px] leading-tight font-medium text-ink">
                       {requirement.label}
                       {requirement.required ? (
-                        <span className="text-danger" aria-label="obligatorio">
+                        <span className="text-danger" aria-label={tr("obligatorio", "required")}>
                           *
                         </span>
                       ) : (
                         <span className="font-mono text-[8.5px] tracking-[0.1em] text-ink-muted/70 uppercase">
-                          opcional
+                          {tr("opcional", "optional")}
                         </span>
                       )}
                     </p>
@@ -207,7 +209,7 @@ export function DocumentPanel({
                             <button
                               type="button"
                               onClick={() => onRemove(requirement.id, item.id)}
-                              aria-label={`Quitar ${item.file.name}`}
+                              aria-label={tr(`Quitar ${item.file.name}`, `Remove ${item.file.name}`)}
                               className="shrink-0 text-ink-muted transition-colors hover:text-danger"
                             >
                               <Trash2 className="size-3" />
@@ -224,7 +226,7 @@ export function DocumentPanel({
                         className="inline-flex items-center gap-1 rounded-md border border-line bg-white px-2 py-1 text-[10.5px] font-medium text-ink transition-colors hover:border-ink"
                       >
                         <Paperclip className="size-2.5" />
-                        {complete ? "Añadir otro" : "Adjuntar"}
+                        {complete ? tr("Añadir otro", "Add another") : tr("Adjuntar", "Attach")}
                       </button>
                       {requirement.conditional ? (
                         <span className="font-mono text-[8.5px] tracking-[0.06em] text-ink-muted/80 uppercase">
@@ -239,7 +241,7 @@ export function DocumentPanel({
                         multiple
                         accept={siteConfig.submission.acceptedExtensions}
                         className="sr-only"
-                        aria-label={`Adjuntar ${requirement.label}`}
+                        aria-label={tr(`Adjuntar ${requirement.label}`, `Attach ${requirement.label}`)}
                         onChange={(event) => {
                           if (event.target.files?.length) onAdd(requirement.id, event.target.files);
                           event.target.value = "";
@@ -256,17 +258,23 @@ export function DocumentPanel({
         <div className="mt-3 flex items-start gap-2 rounded-lg bg-paper px-2.5 py-2">
           <Lock className="mt-[1px] size-3 shrink-0 text-ok" aria-hidden="true" />
           <p className="text-[10.5px] leading-snug text-ink-muted">
-            Los archivos se cifran en tu navegador antes de salir del dispositivo. Nunca se envían
-            en claro ni por email abierto.
+            {tr(
+              "Los archivos se cifran en tu navegador antes de salir del dispositivo. Nunca se envían en claro ni por email abierto.",
+              "Files are encrypted in your browser before they leave your device. They're never sent in plain text or by regular email.",
+            )}
           </p>
         </div>
 
         <div className="mt-2.5 flex items-center justify-between gap-2 text-[10px] text-ink-muted">
           <span className="inline-flex items-center gap-1">
             <ShieldCheck className="size-3" aria-hidden="true" />
-            {totalFiles} {totalFiles === 1 ? "archivo" : "archivos"} en el expediente
+            {totalFiles}{" "}
+            {totalFiles === 1 ? tr("archivo", "file") : tr("archivos", "files")}{" "}
+            {tr("en el expediente", "in the application")}
           </span>
-          <span className="font-mono text-[9px] tracking-[0.08em] uppercase">Cifrado en origen</span>
+          <span className="font-mono text-[9px] tracking-[0.08em] uppercase">
+            {tr("Cifrado en origen", "Encrypted at source")}
+          </span>
         </div>
       </div>
     </section>

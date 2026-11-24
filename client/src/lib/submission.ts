@@ -3,6 +3,7 @@ import { encryptApplication, fileToBase64, type EncryptedEnvelope } from "./cryp
 import { documentRequirements } from "./options";
 import { onlyDigits } from "./validation";
 import type { ApplicationState } from "./types";
+import { getLang, tr } from "./i18n";
 
 export interface SubmissionDocument {
   slot: string;
@@ -104,7 +105,7 @@ export function buildPayload(state: ApplicationState, reference: string): Applic
   return {
     reference,
     submittedAt: new Date().toISOString(),
-    locale: "es",
+    locale: getLang(),
     source: "drivepayments-merchant-onboarding",
     consent: {
       accepted: state.consent,
@@ -161,7 +162,7 @@ async function attachDocumentData(
 
   for (const entry of files) {
     index += 1;
-    onProgress?.(`Preparando documentos ${index}/${files.length}`);
+    onProgress?.(tr(`Preparando documentos ${index}/${files.length}`, `Preparing documents ${index}/${files.length}`));
     const dataBase64 = await fileToBase64(entry.item.file);
     totalBytes += entry.item.file.size;
     withData.push({
@@ -200,11 +201,11 @@ export async function submitApplication(
   reference: string,
   onProgress?: (message: string) => void,
 ): Promise<{ envelope: EncryptedEnvelope; outcome: DeliveryOutcome }> {
-  onProgress?.("Preparando el expediente");
+  onProgress?.(tr("Preparando el expediente", "Preparing your application"));
   const basePayload = buildPayload(state, reference);
   const { payload, totalBytes } = await attachDocumentData(basePayload, state, onProgress);
 
-  onProgress?.("Cifrando en tu dispositivo");
+  onProgress?.(tr("Cifrando en tu dispositivo", "Encrypting on your device"));
   // Resumen mínimo (también cifrado) para poder listar el expediente en el CRM
   // sin descargar ni descifrar los documentos.
   const summary = {
@@ -236,7 +237,7 @@ export async function submitApplication(
     return { envelope, outcome: { kind: "download", reference, filename } };
   }
 
-  onProgress?.("Enviando por canal cifrado");
+  onProgress?.(tr("Enviando por canal cifrado", "Sending over an encrypted channel"));
   const controller = new AbortController();
   // Hasta ~41 MB cifrados: margen para conexiones móviles lentas.
   const timeout = setTimeout(() => controller.abort(), 120000);
@@ -250,7 +251,7 @@ export async function submitApplication(
     });
 
     if (!response.ok) {
-      throw new Error(`El endpoint respondió ${response.status}.`);
+      throw new Error(tr(`El endpoint respondió ${response.status}.`, `The server responded ${response.status}.`));
     }
 
     return { envelope, outcome: { kind: "sent", reference } };
@@ -262,7 +263,10 @@ export async function submitApplication(
         kind: "download",
         reference,
         filename,
-        reason: error instanceof Error ? error.message : "No se pudo contactar con el endpoint.",
+        reason:
+          error instanceof Error
+            ? error.message
+            : tr("No se pudo contactar con el endpoint.", "Couldn't reach the server."),
       },
     };
   } finally {

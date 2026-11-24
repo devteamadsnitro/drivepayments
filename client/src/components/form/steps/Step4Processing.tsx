@@ -10,6 +10,7 @@ import {
 import { processingMethods } from "@/lib/options";
 import { formatMoney, onlyDigits } from "@/lib/validation";
 import type { Errors, ProcessingChannel, ProcessingInfo } from "@/lib/types";
+import { tr } from "@/lib/i18n";
 
 export function Step4Processing({
   processing,
@@ -24,13 +25,13 @@ export function Step4Processing({
     <div className="flex flex-col gap-8">
       <FormSection
         index="01"
-        title="Qué quieres procesar"
-        description="Esto define el tipo de cuenta que solicitamos al procesador."
+        title={tr("Qué quieres procesar", "What you want to process")}
+        description={tr("Esto define el tipo de cuenta que solicitamos al procesador.", "This defines the type of account we request from the processor.")}
       >
         <div className="flex flex-col gap-5">
           <Field
             id="processing.methods"
-            label="Método(s) solicitados"
+            label={tr("Método(s) solicitados", "Requested method(s)")}
             required
             error={errors["processing.methods"]}
           >
@@ -49,7 +50,7 @@ export function Step4Processing({
 
           <Field
             id="processing.acceptsCardsNow"
-            label="¿Aceptas tarjeta ahora mismo?"
+            label={tr("¿Aceptas tarjeta ahora mismo?", "Do you accept cards right now?")}
             required
             error={errors["processing.acceptsCardsNow"]}
           >
@@ -65,17 +66,17 @@ export function Step4Processing({
             <div className="animate-step-in">
               <Field
                 id="processing.currentProcessor"
-                label="¿Con qué procesador?"
+                label={tr("¿Con qué procesador?", "With which processor?")}
                 required
                 error={errors["processing.currentProcessor"]}
-                hint="Si trabajas con varios, indica el principal."
+                hint={tr("Si trabajas con varios, indica el principal.", "If you use several, enter the main one.")}
                 className="sm:max-w-md"
               >
                 <TextInput
                   id="processing.currentProcessor"
                   value={processing.currentProcessor}
                   onChange={(value) => update({ currentProcessor: value })}
-                  placeholder="Ej. Stripe, Square, Authorize.net"
+                  placeholder={tr("Ej. Stripe, Square, Authorize.net", "e.g. Stripe, Square, Authorize.net")}
                   error={Boolean(errors["processing.currentProcessor"])}
                 />
               </Field>
@@ -86,22 +87,22 @@ export function Step4Processing({
 
       <FormSection
         index="02"
-        title="Volumen y ticket"
-        description="Cifras medias de los últimos meses. Sirven para dimensionar la cuenta y negociar las comisiones."
+        title={tr("Volumen y ticket", "Volume and ticket size")}
+        description={tr("Cifras medias de los últimos meses. Sirven para dimensionar la cuenta y negociar las comisiones.", "Average figures from recent months. They're used to size the account and negotiate fees.")}
       >
         <Grid cols={3}>
           <Field
             id="processing.monthlyVolume"
-            label="Volumen mensual"
+            label={tr("Volumen mensual", "Monthly volume")}
             required
             error={errors["processing.monthlyVolume"]}
-            hint="Total procesado al mes."
+            hint={tr("Total procesado al mes.", "Total processed per month.")}
           >
             <TextInput
               id="processing.monthlyVolume"
               value={formatMoney(processing.monthlyVolume)}
               onChange={(value) => update({ monthlyVolume: onlyDigits(value) })}
-              placeholder="150.000"
+              placeholder={tr("150.000", "150,000")}
               inputMode="numeric"
               prefix="$"
               suffix="USD"
@@ -112,10 +113,10 @@ export function Step4Processing({
 
           <Field
             id="processing.averageTicket"
-            label="Transacción media"
+            label={tr("Transacción media", "Average transaction")}
             required
             error={errors["processing.averageTicket"]}
-            hint="Importe medio por venta."
+            hint={tr("Importe medio por venta.", "Average amount per sale.")}
           >
             <TextInput
               id="processing.averageTicket"
@@ -132,15 +133,15 @@ export function Step4Processing({
 
           <Field
             id="processing.highTicket"
-            label="Transacción más alta"
+            label={tr("Transacción más alta", "Highest transaction")}
             error={errors["processing.highTicket"]}
-            hint="Tu venta máxima habitual."
+            hint={tr("Tu venta máxima habitual.", "Your usual largest sale.")}
           >
             <TextInput
               id="processing.highTicket"
               value={formatMoney(processing.highTicket)}
               onChange={(value) => update({ highTicket: onlyDigits(value) })}
-              placeholder="2.500"
+              placeholder={tr("2.500", "2,500")}
               inputMode="numeric"
               prefix="$"
               suffix="USD"
@@ -153,16 +154,16 @@ export function Step4Processing({
 
       <FormSection
         index="03"
-        title="Operativa y protección"
-        description="Cómo cobras hoy y qué necesitas del procesador."
+        title={tr("Operativa y protección", "Operations and protection")}
+        description={tr("Cómo cobras hoy y qué necesitas del procesador.", "How you take payments today and what you need from the processor.")}
       >
         <div className="flex flex-col gap-5">
           <Field
             id="processing.channels"
-            label="Cómo procesas"
+            label={tr("Cómo procesas", "How you process")}
             required
             error={errors["processing.channels"]}
-            hint="Puedes marcar varias opciones."
+            hint={tr("Puedes marcar varias opciones.", "You can select several options.")}
           >
             <Chips
               id="processing.channels"
@@ -177,8 +178,8 @@ export function Step4Processing({
               }}
               options={[
                 { value: "online", label: "Online" },
-                { value: "inperson", label: "Presencial" },
-                { value: "phone", label: "Teléfono / MOTO" },
+                { value: "inperson", label: tr("Presencial", "In person") },
+                { value: "phone", label: tr("Teléfono / MOTO", "Phone / MOTO") },
               ]}
               error={Boolean(errors["processing.channels"])}
             />
@@ -187,7 +188,7 @@ export function Step4Processing({
           <div className="grid gap-5 sm:grid-cols-2">
             <Field
               id="processing.fraudProtection"
-              label="¿Te interesa la protección de fraude y chargebacks?"
+              label={tr("¿Te interesa la protección de fraude y chargebacks?", "Are you interested in fraud and chargeback protection?")}
               required
               error={errors["processing.fraudProtection"]}
             >
@@ -201,7 +202,7 @@ export function Step4Processing({
 
             <Field
               id="processing.needsAch"
-              label="¿Necesitas eChecks / ACH?"
+              label={tr("¿Necesitas eChecks / ACH?", "Do you need eChecks / ACH?")}
               required
               error={errors["processing.needsAch"]}
             >
@@ -215,10 +216,10 @@ export function Step4Processing({
 
             <Field
               id="processing.enrolledRdr"
-              label="¿Estás dado de alta en RDR u otro programa de chargebacks?"
+              label={tr("¿Estás dado de alta en RDR u otro programa de chargebacks?", "Are you enrolled in RDR or another chargeback program?")}
               required
               error={errors["processing.enrolledRdr"]}
-              hint="RDR, Ethoca, CDRN o similar."
+              hint={tr("RDR, Ethoca, CDRN o similar.", "RDR, Ethoca, CDRN or similar.")}
               className="sm:col-span-2"
             >
               <YesNo

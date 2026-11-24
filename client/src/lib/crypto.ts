@@ -1,4 +1,5 @@
 import { siteConfig } from "../config/site";
+import { tr } from "./i18n";
 
 /**
  * Cifrado híbrido en el navegador.
@@ -51,7 +52,10 @@ function bytesToBase64(bytes: Uint8Array): string {
 async function importRecipientKey(): Promise<CryptoKey> {
   if (!isSecureCryptoAvailable()) {
     throw new Error(
-      "Tu navegador no permite cifrado seguro en este contexto. Abre la página por HTTPS o desde localhost.",
+      tr(
+        "Tu navegador no permite cifrado seguro en este contexto. Abre la página por HTTPS o desde localhost.",
+        "Your browser doesn't allow secure encryption in this context. Open the page over HTTPS or from localhost.",
+      ),
     );
   }
   return globalThis.crypto.subtle.importKey(

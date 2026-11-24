@@ -19,6 +19,7 @@ import {
 } from "@/lib/options";
 import { formatPhone, formatTaxId } from "@/lib/validation";
 import type { BusinessInfo, Errors } from "@/lib/types";
+import { tr } from "@/lib/i18n";
 
 export function Step1Business({
   business,
@@ -46,13 +47,13 @@ export function Step1Business({
     <div className="flex flex-col gap-8">
       <FormSection
         index="01"
-        title="Identidad de la empresa"
-        description="Tal y como aparece en el registro mercantil y en la documentación bancaria."
+        title={tr("Identidad de la empresa", "Company identity")}
+        description={tr("Tal y como aparece en el registro mercantil y en la documentación bancaria.", "Exactly as it appears in the business registration and bank documents.")}
       >
         <Grid>
           <Field
             id="business.ownershipType"
-            label="Tipo de titularidad"
+            label={tr("Tipo de titularidad", "Ownership type")}
             required
             error={errors["business.ownershipType"]}
           >
@@ -61,7 +62,7 @@ export function Step1Business({
               value={business.ownershipType}
               onChange={(value) => update({ ownershipType: value })}
               options={ownershipTypes}
-              placeholder="Selecciona la forma jurídica"
+              placeholder={tr("Selecciona la forma jurídica", "Select the legal structure")}
               error={Boolean(errors["business.ownershipType"])}
             />
           </Field>
@@ -71,7 +72,7 @@ export function Step1Business({
             label="Tax ID / EIN"
             required
             error={errors["business.taxId"]}
-            hint="Los 9 dígitos de tu EIN, tal y como figuran en la carta del IRS."
+            hint={tr("Los 9 dígitos de tu EIN, tal y como figuran en la carta del IRS.", "The 9 digits of your EIN, as shown on your IRS letter.")}
           >
             <TextInput
               id="business.taxId"
@@ -86,16 +87,16 @@ export function Step1Business({
 
           <Field
             id="business.legalName"
-            label="Razón social"
+            label={tr("Razón social", "Legal business name")}
             required
             error={errors["business.legalName"]}
-            hint="Nombre legal completo, incluido el sufijo (LLC, Inc., S.L.)."
+            hint={tr("Nombre legal completo, incluido el sufijo (LLC, Inc., S.L.).", "Full legal name, including the suffix (LLC, Inc., S.L.).")}
           >
             <TextInput
               id="business.legalName"
               value={business.legalName}
               onChange={(value) => update({ legalName: value })}
-              placeholder="Ej. Northwind Digital LLC"
+              placeholder={tr("Ej. Northwind Digital LLC", "e.g. Northwind Digital LLC")}
               autoComplete="organization"
               error={Boolean(errors["business.legalName"])}
             />
@@ -103,40 +104,40 @@ export function Step1Business({
 
           <Field
             id="business.dbaName"
-            label="Nombre comercial (DBA)"
+            label={tr("Nombre comercial (DBA)", "Trade name (DBA)")}
             required
             error={errors["business.dbaName"]}
-            hint="El nombre con el que tus clientes te reconocen en el extracto."
+            hint={tr("El nombre con el que tus clientes te reconocen en el extracto.", "The name your customers see on their statement.")}
           >
             <TextInput
               id="business.dbaName"
               value={business.dbaName}
               onChange={(value) => update({ dbaName: value })}
-              placeholder="Ej. Northwind Store"
+              placeholder={tr("Ej. Northwind Store", "e.g. Northwind Store")}
               error={Boolean(errors["business.dbaName"])}
             />
           </Field>
 
           <Field
             id="business.businessType"
-            label="Tipo de negocio"
+            label={tr("Tipo de negocio", "Business type")}
             required
             error={errors["business.businessType"]}
-            hint="Lo usamos para asignar el MCC correcto en el alta."
+            hint={tr("Lo usamos para asignar el MCC correcto en el alta.", "We use it to assign the correct MCC during onboarding.")}
           >
             <Combobox
               id="business.businessType"
               value={business.businessType}
               onChange={(value) => update({ businessType: value })}
               options={businessTypes}
-              placeholder="Busca tu sector…"
+              placeholder={tr("Busca tu sector…", "Search your industry…")}
               error={Boolean(errors["business.businessType"])}
             />
           </Field>
 
           <Field
             id="business.locationType"
-            label="Tipo de local"
+            label={tr("Tipo de local", "Location type")}
             required
             error={errors["business.locationType"]}
           >
@@ -145,16 +146,16 @@ export function Step1Business({
               value={business.locationType}
               onChange={(value) => update({ locationType: value })}
               options={locationTypes}
-              placeholder="¿Dónde operas?"
+              placeholder={tr("¿Dónde operas?", "Where do you operate?")}
               error={Boolean(errors["business.locationType"])}
             />
           </Field>
 
           <Field
             id="business.yearsInBusiness"
-            label="Antigüedad del negocio"
+            label={tr("Antigüedad del negocio", "Time in business")}
             required
-            hint="Desde la constitución o el inicio de la actividad."
+            hint={tr("Desde la constitución o el inicio de la actividad.", "Since incorporation or the start of operations.")}
             className="sm:col-span-2"
           >
             <YearsMonths
@@ -171,16 +172,16 @@ export function Step1Business({
 
           <Field
             id="business.description"
-            label="Descripción del negocio"
+            label={tr("Descripción del negocio", "Business description")}
             error={errors["business.description"]}
-            hint="Qué vendes, a quién y cómo cobras. Dos o tres frases bastan."
+            hint={tr("Qué vendes, a quién y cómo cobras. Dos o tres frases bastan.", "What you sell, to whom and how you get paid. Two or three sentences are enough.")}
             className="sm:col-span-2"
           >
             <Textarea
               id="business.description"
               value={business.description}
               onChange={(value) => update({ description: value })}
-              placeholder="Ej. Vendemos equipamiento de entrenamiento funcional a gimnasios de EE. UU. y Canadá. Facturación media de 8.000 USD al mes, envíos desde nuestro almacén de Miami."
+              placeholder={tr("Ej. Vendemos equipamiento de entrenamiento funcional a gimnasios de EE. UU. y Canadá. Facturación media de 8.000 USD al mes, envíos desde nuestro almacén de Miami.", "e.g. We sell functional training equipment to gyms in the US and Canada. Average revenue of USD 8,000 per month, shipping from our Miami warehouse.")}
               maxLength={600}
               rows={4}
             />
@@ -190,13 +191,13 @@ export function Step1Business({
 
       <FormSection
         index="02"
-        title="Contacto"
-        description="Para validar el alta y avisarte de cualquier documento que falte."
+        title={tr("Contacto", "Contact")}
+        description={tr("Para validar el alta y avisarte de cualquier documento que falte.", "To verify your application and let you know about any missing documents.")}
       >
         <Grid>
           <Field
             id="business.phone"
-            label="Teléfono del negocio"
+            label={tr("Teléfono del negocio", "Business phone")}
             required
             error={errors["business.phone"]}
           >
@@ -204,7 +205,7 @@ export function Step1Business({
               <select
                 value={business.phoneDial}
                 onChange={(event) => update({ phoneDial: event.target.value })}
-                aria-label="Prefijo de país"
+                aria-label={tr("Prefijo de país", "Country code")}
                 className="field-input h-11 w-[104px] shrink-0"
               >
                 {countries.map((country) => (
@@ -227,17 +228,17 @@ export function Step1Business({
 
           <Field
             id="business.businessEmail"
-            label="Email del negocio"
+            label={tr("Email del negocio", "Business email")}
             required
             error={errors["business.businessEmail"]}
-            hint="Donde puedas recibir la documentación del alta."
+            hint={tr("Donde puedas recibir la documentación del alta.", "Where you can receive onboarding documents.")}
           >
             <TextInput
               id="business.businessEmail"
               type="email"
               value={business.businessEmail}
               onChange={(value) => update({ businessEmail: value })}
-              placeholder="finanzas@tuempresa.com"
+              placeholder={tr("finanzas@tuempresa.com", "finance@yourcompany.com")}
               autoComplete="email"
               error={Boolean(errors["business.businessEmail"])}
             />
@@ -245,7 +246,7 @@ export function Step1Business({
 
           <Field
             id="business.contactMethod"
-            label="Método de contacto preferido"
+            label={tr("Método de contacto preferido", "Preferred contact method")}
             required
             error={errors["business.contactMethod"]}
             className="sm:col-span-2"
@@ -255,7 +256,7 @@ export function Step1Business({
               value={business.contactMethod}
               onChange={(value) => update({ contactMethod: value as BusinessInfo["contactMethod"] })}
               options={[
-                { value: "phone", label: "Teléfono" },
+                { value: "phone", label: tr("Teléfono", "Phone") },
                 { value: "telegram", label: "Telegram" },
                 { value: "whatsapp", label: "WhatsApp" },
               ]}
@@ -265,9 +266,9 @@ export function Step1Business({
 
           <Field
             id="business.websites.0"
-            label="Web del negocio"
+            label={tr("Web del negocio", "Business website")}
             error={websiteErrors[0]}
-            hint="Puedes añadir varias tiendas o landings."
+            hint={tr("Puedes añadir varias tiendas o landings.", "You can add several stores or landing pages.")}
             className="sm:col-span-2"
           >
             <WebsiteList
@@ -281,13 +282,13 @@ export function Step1Business({
 
       <FormSection
         index="03"
-        title="Dirección legal"
-        description="La que figura en el registro. Debe coincidir con la de tu extracto bancario."
+        title={tr("Dirección legal", "Legal address")}
+        description={tr("La que figura en el registro. Debe coincidir con la de tu extracto bancario.", "The registered address. It must match your bank statement.")}
       >
         <Grid>
           <Field
             id="business.country"
-            label="País"
+            label={tr("País", "Country")}
             required
             error={errors["business.country"]}
             className="sm:col-span-2"
@@ -297,14 +298,14 @@ export function Step1Business({
               value={business.country}
               onChange={setCountry}
               options={countries.map((country) => ({ value: country.code, label: country.label }))}
-              placeholder="Selecciona el país"
+              placeholder={tr("Selecciona el país", "Select the country")}
               error={Boolean(errors["business.country"])}
             />
           </Field>
 
           <Field
             id="business.legalAddress"
-            label="Dirección legal"
+            label={tr("Dirección legal", "Legal address")}
             required
             error={errors["business.legalAddress"]}
             className="sm:col-span-2"
@@ -313,13 +314,13 @@ export function Step1Business({
               id="business.legalAddress"
               value={business.legalAddress}
               onChange={(value) => update({ legalAddress: value })}
-              placeholder="Calle, número, piso, suite"
+              placeholder={tr("Calle, número, piso, suite", "Street, number, floor, suite")}
               autoComplete="street-address"
               error={Boolean(errors["business.legalAddress"])}
             />
           </Field>
 
-          <Field id="business.city" label="Ciudad" required error={errors["business.city"]}>
+          <Field id="business.city" label={tr("Ciudad", "City")} required error={errors["business.city"]}>
             <TextInput
               id="business.city"
               value={business.city}
@@ -332,7 +333,7 @@ export function Step1Business({
 
           <Field
             id="business.state"
-            label="Estado / provincia"
+            label={tr("Estado / provincia", "State / province")}
             required
             error={errors["business.state"]}
           >
@@ -342,7 +343,7 @@ export function Step1Business({
                 value={business.state}
                 onChange={(value) => update({ state: value })}
                 options={usStates}
-                placeholder="Selecciona el estado"
+                placeholder={tr("Selecciona el estado", "Select the state")}
                 error={Boolean(errors["business.state"])}
               />
             ) : (
@@ -350,14 +351,14 @@ export function Step1Business({
                 id="business.state"
                 value={business.state}
                 onChange={(value) => update({ state: value })}
-                placeholder="Estado, provincia o región"
+                placeholder={tr("Estado, provincia o región", "State, province or region")}
                 autoComplete="address-level1"
                 error={Boolean(errors["business.state"])}
               />
             )}
           </Field>
 
-          <Field id="business.zip" label="Código postal (Zip)" required error={errors["business.zip"]}>
+          <Field id="business.zip" label={tr("Código postal (Zip)", "ZIP / postal code")} required error={errors["business.zip"]}>
             <TextInput
               id="business.zip"
               value={business.zip}
@@ -370,7 +371,7 @@ export function Step1Business({
 
           <Field
             id="business.yearsAtLocation"
-            label="Tiempo en la ubicación actual"
+            label={tr("Tiempo en la ubicación actual", "Time at current location")}
             required
           >
             <YearsMonths
@@ -389,13 +390,13 @@ export function Step1Business({
 
       <FormSection
         index="04"
-        title="Ubicación del DBA"
-        description="Solo si operas desde una dirección distinta a la legal."
+        title={tr("Ubicación del DBA", "DBA location")}
+        description={tr("Solo si operas desde una dirección distinta a la legal.", "Only if you operate from an address other than the legal one.")}
       >
         <div className="flex flex-col gap-4">
           <Field
             id="business.dbaSameAsLegal"
-            label="¿La dirección del DBA es la misma que la legal?"
+            label={tr("¿La dirección del DBA es la misma que la legal?", "Is the DBA address the same as the legal address?")}
             required
             error={errors["business.dbaSameAsLegal"]}
           >
@@ -406,8 +407,8 @@ export function Step1Business({
                 update({ dbaSameAsLegal: value as BusinessInfo["dbaSameAsLegal"] })
               }
               options={[
-                { value: "yes", label: "Sí, es la misma" },
-                { value: "no", label: "No, es distinta" },
+                { value: "yes", label: tr("Sí, es la misma", "Yes, it's the same") },
+                { value: "no", label: tr("No, es distinta", "No, it's different") },
               ]}
               error={Boolean(errors["business.dbaSameAsLegal"])}
             />
@@ -418,7 +419,7 @@ export function Step1Business({
               <Grid>
                 <Field
                   id="business.dbaAddress"
-                  label="Dirección del DBA"
+                  label={tr("Dirección del DBA", "DBA address")}
                   required
                   error={errors["business.dbaAddress"]}
                   className="sm:col-span-2"
@@ -427,22 +428,22 @@ export function Step1Business({
                     id="business.dbaAddress"
                     value={business.dbaAddress}
                     onChange={(value) => update({ dbaAddress: value })}
-                    placeholder="Calle, número, piso, suite"
+                    placeholder={tr("Calle, número, piso, suite", "Street, number, floor, suite")}
                     error={Boolean(errors["business.dbaAddress"])}
                   />
                 </Field>
-                <Field id="business.dbaCity" label="Ciudad" required error={errors["business.dbaCity"]}>
+                <Field id="business.dbaCity" label={tr("Ciudad", "City")} required error={errors["business.dbaCity"]}>
                   <TextInput
                     id="business.dbaCity"
                     value={business.dbaCity}
                     onChange={(value) => update({ dbaCity: value })}
-                    placeholder="Ciudad"
+                    placeholder={tr("Ciudad", "City")}
                     error={Boolean(errors["business.dbaCity"])}
                   />
                 </Field>
                 <Field
                   id="business.dbaState"
-                  label="Estado / provincia"
+                  label={tr("Estado / provincia", "State / province")}
                   required
                   error={errors["business.dbaState"]}
                 >
@@ -450,16 +451,16 @@ export function Step1Business({
                     id="business.dbaState"
                     value={business.dbaState}
                     onChange={(value) => update({ dbaState: value })}
-                    placeholder="Estado o provincia"
+                    placeholder={tr("Estado o provincia", "State or province")}
                     error={Boolean(errors["business.dbaState"])}
                   />
                 </Field>
-                <Field id="business.dbaZip" label="Código postal" required error={errors["business.dbaZip"]}>
+                <Field id="business.dbaZip" label={tr("Código postal", "ZIP / postal code")} required error={errors["business.dbaZip"]}>
                   <TextInput
                     id="business.dbaZip"
                     value={business.dbaZip}
                     onChange={(value) => update({ dbaZip: value })}
-                    placeholder="Código postal"
+                    placeholder={tr("Código postal", "ZIP / postal code")}
                     error={Boolean(errors["business.dbaZip"])}
                   />
                 </Field>
