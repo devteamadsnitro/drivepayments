@@ -30,7 +30,17 @@ function detect(): Lang {
 }
 
 let current: Lang = detect();
-if (typeof document !== "undefined") document.documentElement.lang = current;
+
+/** Título de la pestaña en el idioma activo (el CRM define el suyo). */
+function syncDocument() {
+  if (typeof document === "undefined") return;
+  document.documentElement.lang = current;
+  if (!window.location.pathname.startsWith("/admin")) {
+    document.title =
+      current === "en" ? "Merchant onboarding · DrivePayments" : "Alta de comercio · DrivePayments";
+  }
+}
+syncDocument();
 
 export function getLang(): Lang {
   return current;
@@ -44,7 +54,7 @@ export function setLang(lang: Lang): void {
   } catch {
     /* almacenamiento bloqueado */
   }
-  document.documentElement.lang = lang;
+  syncDocument();
   listeners.forEach((listener) => listener());
 }
 

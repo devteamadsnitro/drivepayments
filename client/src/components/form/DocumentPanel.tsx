@@ -47,7 +47,7 @@ export function DocumentPanel({
         <div>
           <h2 className="flex items-center gap-1.5 text-[13.5px] font-semibold text-ink">
             <Paperclip className="size-3.5 text-ink-muted" aria-hidden="true" />
-            Documentos
+            {tr("Documentos", "Documents")}
           </h2>
           <p className="mt-0.5 text-[11px] text-ink-muted">
             {tr("Disponible en los cuatro pasos", "Available in all four steps")}
@@ -61,7 +61,7 @@ export function DocumentPanel({
               : "border-line bg-paper text-ink-muted",
           )}
         >
-          {requiredDone}/{requiredSlots.length} obligatorios
+          {requiredDone}/{requiredSlots.length} {tr("obligatorios", "required")}
         </span>
       </header>
 

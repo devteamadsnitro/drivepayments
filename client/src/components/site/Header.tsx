@@ -36,7 +36,7 @@ export function Header() {
 
           <span className="hidden h-3.5 w-px bg-line-strong/70 md:block" aria-hidden="true" />
 
-          <span className="inline-flex items-center gap-2 rounded-full border border-line bg-white/60 px-2.5 py-1 whitespace-nowrap max-[359px]:hidden">
+          <span className="inline-flex items-center gap-2 rounded-full border border-line bg-white/60 px-2.5 py-1 whitespace-nowrap max-[459px]:hidden">
             <span className="relative flex size-1.5">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-ok opacity-60" />
               <span className="relative inline-flex size-1.5 rounded-full bg-ok" />
