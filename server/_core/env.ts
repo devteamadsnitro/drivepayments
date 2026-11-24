@@ -1,14 +1,15 @@
-// Platform values are read at use time. See the Webdev service/authentication skills.
+// Values are read at use time so tests and tooling can stub them.
 export const ENV = {
-  get appId() { return process.env.MANUS_PROJECT_ID ?? ""; },
-  get cookieSecret() { return process.env.MANUS_JWT_SECRET ?? ""; },
+  /**
+   * Signs CRM session cookies and derives the key for encrypted CRM notes.
+   * MANUS_JWT_SECRET is accepted as a fallback for deployments created before
+   * the Manus removal; the value must not change or old notes become unreadable.
+   */
+  get sessionSecret() { return process.env.SESSION_SECRET ?? process.env.MANUS_JWT_SECRET ?? ""; },
+  /** One-time code required to create the first CRM administrator. */
+  get crmSetupToken() { return process.env.CRM_SETUP_TOKEN ?? ""; },
   get databaseUrl() { return process.env.DATABASE_URL ?? ""; },
-  get oAuthServerUrl() { return process.env.MANUS_OAUTH_API_URL ?? ""; },
-  // Preserve the legacy hint when supplied; otherwise roles remain application data.
-  get ownerOpenId() { return process.env.OWNER_OPEN_ID ?? ""; },
   get isProduction() { return process.env.NODE_ENV === "production"; },
-  get forgeApiUrl() { return process.env.MANUS_API_URL ?? ""; },
-  get forgeApiKey() { return process.env.MANUS_API_KEY ?? ""; },
   // Object storage (Railway Bucket / any S3-compatible provider)
   get s3Bucket() { return process.env.S3_BUCKET ?? ""; },
   get s3Endpoint() { return process.env.S3_ENDPOINT ?? ""; },

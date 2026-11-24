@@ -47,13 +47,13 @@
 - [x] Diseño responsive de móvil a escritorio y navegación por teclado con foco visible.
 - [x] Avisos visibles de seguridad y tratamiento de datos sensibles.
 - [x] Política de privacidad publicada en su propia ruta y enlazada desde el formulario y el pie.
-- [x] `manus-routes.json`, metadatos, favicon y logotipo del proyecto configurados.
+- [x] Metadatos, favicon y logotipo del proyecto configurados.
 - [x] Sin errores de tipos (`pnpm check`) y build de producción correcto.
 
 ## 11. CRM interno de expedientes
 - [x] Cada solicitud se guarda como sobre cifrado en object storage y fila índice en MySQL (referencia, estado, tamaño, documentos, resumen y notas cifradas); nunca hay datos en texto plano en el servidor.
 - [x] `POST /api/submissions` valida el sobre, limita el cuerpo a 70 MB y aplica un rate limit de 12 envíos por hora e IP.
-- [x] Acceso a `/admin` con sesión de Manus y rol `admin`; el primer usuario autenticado se convierte en administrador y el resto recibe 403.
+- [x] Acceso a `/admin` con email y contraseña (scrypt, sesión de 12 h); primer administrador con `CRM_SETUP_TOKEN`; gestión del equipo desde el panel Equipo.
 - [x] Bandeja con búsqueda, filtros por estado y contadores; el resumen se descifra en el navegador del operador.
 - [x] Detalle por pestañas (negocio, titulares, banco, procesamiento, documentos, actividad) con máscaras de SSN y número de cuenta.
 - [x] Previsualización y descarga de documentos y exportación ZIP del expediente completo.

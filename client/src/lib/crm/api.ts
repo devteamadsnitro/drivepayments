@@ -48,6 +48,18 @@ export interface SessionDto {
   user: { name: string | null; email: string | null; role: string } | null;
   canAccess: boolean;
   adminExists: boolean;
+  /** true si aún no hay administrador y el servidor tiene CRM_SETUP_TOKEN. */
+  setupAvailable: boolean;
+}
+
+export interface TeamMemberDto {
+  id: number;
+  name: string | null;
+  email: string | null;
+  role: string;
+  createdAt: string;
+  lastSignedIn: string;
+  isSelf: boolean;
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -91,6 +103,23 @@ export const crmApi = {
       body: JSON.stringify(body),
     }),
   logout: () => request<{ ok: true }>("/api/crm/logout", { method: "POST", body: "{}" }),
+  login: (email: string, password: string) =>
+    request<{ ok: true }>("/api/crm/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+  setup: (body: { email: string; name: string; password: string; setupToken: string }) =>
+    request<{ ok: true }>("/api/crm/setup", { method: "POST", body: JSON.stringify(body) }),
+  changePassword: (current: string, next: string) =>
+    request<{ ok: true }>("/api/crm/password", {
+      method: "POST",
+      body: JSON.stringify({ current, next }),
+    }),
+  team: () => request<{ users: TeamMemberDto[] }>("/api/crm/users"),
+  addMember: (body: { email: string; name: string; password: string }) =>
+    request<{ user: TeamMemberDto }>("/api/crm/users", { method: "POST", body: JSON.stringify(body) }),
+  removeMember: (id: number) =>
+    request<{ ok: true }>(`/api/crm/users/${id}`, { method: "DELETE", body: "{}" }),
   remove: (id: string) =>
     request<{ ok: true }>(`/api/crm/leads/${id}`, { method: "DELETE", body: "{}" }),
 };

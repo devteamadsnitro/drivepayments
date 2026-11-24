@@ -12,6 +12,7 @@ import {
   Search,
   ShieldCheck,
   Upload,
+  Users,
 } from "lucide-react";
 import { LogoMark, Wordmark } from "@/components/Brand";
 import { LeadDetail } from "@/components/crm/LeadDetail";
@@ -23,7 +24,8 @@ import {
   formatDate,
   formatMoney,
 } from "@/components/crm/ui";
-import { startLogin } from "@/const";
+import { LoginScreen, NoAdminScreen, SetupScreen } from "@/components/crm/AuthScreens";
+import { TeamPanel } from "@/components/crm/TeamPanel";
 import {
   crmApi,
   type Counters,
@@ -96,18 +98,24 @@ export default function Admin() {
   const [summaries, setSummaries] = useState<Record<string, LeadSummary | null>>({});
   const attempted = useRef(new Set<string>());
 
-  useEffect(() => {
-    document.title = "CRM · DrivePayments";
-    void (async () => {
-      try {
-        const data = await crmApi.session();
-        setSession(data);
+  const [teamOpen, setTeamOpen] = useState(false);
+
+  const refreshSession = async () => {
+    try {
+      const data = await crmApi.session();
+      setSession(data);
+      if (data.canAccess) {
         const restored = await restoreKey();
         if (restored) setUnlock({ fingerprint: restored.fingerprint });
-      } catch {
-        setSessionError("No se pudo comprobar la sesión. Recarga la página.");
       }
-    })();
+    } catch {
+      setSessionError("No se pudo comprobar la sesión. Recarga la página.");
+    }
+  };
+
+  useEffect(() => {
+    document.title = "CRM · DrivePayments";
+    void refreshSession();
   }, []);
 
   const loadLeads = async (status: LeadStatus | "all") => {
@@ -256,29 +264,13 @@ export default function Admin() {
   if (!session.user) {
     return (
       <CenteredShell>
-        <div className="rounded-2xl border border-line bg-white p-7">
-          <span className="inline-flex items-center gap-2 rounded-full border border-line bg-paper/60 px-2.5 py-1 font-mono text-[9.5px] tracking-[0.16em] text-ink-muted uppercase">
-            <Lock className="size-3" /> Área privada
-          </span>
-          <h1 className="mt-4 text-[26px] leading-tight font-semibold tracking-[-0.03em] text-ink">
-            CRM de expedientes
-          </h1>
-          <p className="mt-2 text-[13.5px] leading-relaxed text-ink-muted">
-            Aquí llegan las solicitudes de alta con sus documentos. El acceso requiere una cuenta de
-            Manus con permiso sobre este proyecto.
-          </p>
-          <button
-            type="button"
-            onClick={() => startLogin("/admin")}
-            className="mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 text-[13.5px] font-medium text-paper transition-colors hover:bg-ink-soft"
-          >
-            Entrar con Manus <ArrowUpRight className="size-4" />
-          </button>
-          <p className="mt-4 text-[11.5px] leading-relaxed text-ink-muted">
-            La primera cuenta que entre será la administradora del CRM. Después podrás invitar a tu
-            equipo desde los ajustes del proyecto.
-          </p>
-        </div>
+        {session.adminExists ? (
+          <LoginScreen onSignedIn={() => void refreshSession()} />
+        ) : session.setupAvailable ? (
+          <SetupScreen onCreated={() => void refreshSession()} />
+        ) : (
+          <NoAdminScreen />
+        )}
       </CenteredShell>
     );
   }
@@ -291,8 +283,8 @@ export default function Admin() {
             Esta cuenta no tiene acceso
           </h1>
           <p className="mt-2 text-[13.5px] leading-relaxed text-ink-muted">
-            Has iniciado sesión como {session.user.email ?? "una cuenta sin email"}, pero el CRM está
-            reservado al administrador del proyecto.
+            Has iniciado sesión como {session.user.email ?? "una cuenta sin email"}, pero esta cuenta
+            no tiene permiso de administrador.
           </p>
           <button
             type="button"
@@ -381,6 +373,14 @@ export default function Admin() {
           <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/60 bg-emerald-50 px-2 py-0.5 text-[10.5px] font-medium text-emerald-900">
             <ShieldCheck className="size-3" /> Clave activa
           </span>
+          <button
+            type="button"
+            onClick={() => setTeamOpen(true)}
+            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-line px-2.5 text-[11.5px] font-medium text-ink-muted transition-colors hover:text-ink"
+          >
+            <Users className="size-3.5" />
+            <span className="hidden sm:inline">Equipo</span>
+          </button>
           <button
             type="button"
             onClick={() => void logout()}
@@ -649,6 +649,7 @@ export default function Admin() {
           </div>
         </div>
       ) : null}
+      {teamOpen ? <TeamPanel onClose={() => setTeamOpen(false)} /> : null}
     </div>
   );
 }

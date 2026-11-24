@@ -13,7 +13,7 @@ import { ENV } from "../_core/env";
 const INFO = Buffer.from("drivepayments-crm-notes-v1");
 
 function notesKey(): Buffer {
-  const secret = ENV.cookieSecret || "drivepayments-local-development-secret";
+  const secret = ENV.sessionSecret || "drivepayments-local-development-secret";
   return Buffer.from(hkdfSync("sha256", Buffer.from(secret), Buffer.from("drivepayments"), INFO, 32));
 }
 
@@ -43,10 +43,9 @@ export function decryptNote(stored: string | null | undefined): string | null {
 
 /** IP del cliente detrás del proxy del entorno, solo para limitar peticiones. */
 export function clientIp(req: Request): string {
-  const forwarded = req.headers["x-forwarded-for"];
-  const raw = Array.isArray(forwarded) ? forwarded[0] : forwarded;
-  const first = raw?.split(",")[0]?.trim();
-  return first || req.socket.remoteAddress || "unknown";
+  // Con `trust proxy = 1`, req.ip es la dirección que vio el proxy de Railway
+  // (la primera entrada de X-Forwarded-For la puede falsificar el cliente).
+  return req.ip || req.socket.remoteAddress || "unknown";
 }
 
 /** Limitador en memoria: suficiente para una instancia y para frenar abusos básicos. */

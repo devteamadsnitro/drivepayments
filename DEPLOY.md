@@ -11,7 +11,7 @@ atiende las dos cosas.
 | Node.js | 22 |
 | pnpm | 10.18 |
 | MySQL | 8.0 |
-| Object storage | S3-compatible (o el storage de Manus) |
+| Object storage | S3-compatible (Railway Bucket, AWS S3, Cloudflare R2…) |
 | Dominio | HTTPS obligatorio: el cifrado del navegador necesita contexto seguro |
 
 ## 2. Variables de entorno
@@ -21,12 +21,9 @@ atiende las dos cosas.
 | `PORT` | no (3000) | Puerto de escucha. |
 | `NODE_ENV` | sí (`production`) | Sirve el build estático en lugar de Vite. |
 | `DATABASE_URL` | sí | `mysql://usuario:clave@host:3306/base`. |
-| `MANUS_JWT_SECRET` | sí | Firma la cookie de sesión y deriva la clave de las notas internas. Cadena larga y aleatoria; si cambia, las notas antiguas dejan de leerse. |
-| `MANUS_PROJECT_ID` | para el CRM | Identificador de la app OAuth. |
-| `MANUS_OAUTH_PORTAL_URL` | para el CRM | Portal de login (`https://manus.ai` o el que corresponda). |
-| `MANUS_OAUTH_API_URL` | para el CRM | API de intercambio de token. |
-| `MANUS_API_URL`, `MANUS_API_KEY` | para el storage | Endpoint y credencial de object storage. |
-| `OWNER_OPEN_ID` | no | Fuerza el `openId` del propietario; el CRM usa la columna `role`. |
+| `SESSION_SECRET` | sí | Firma la cookie de sesión del CRM y deriva la clave de las notas internas. Cadena aleatoria de 32+ caracteres; si cambia, las notas antiguas dejan de leerse. (Se acepta `MANUS_JWT_SECRET` como nombre antiguo.) |
+| `CRM_SETUP_TOKEN` | para el primer acceso | Código para crear el primer administrador en `/admin`. Deja de usarse en cuanto existe uno. |
+| `S3_BUCKET`, `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | sí | Bucket S3-compatible. En Railway, referencias a las variables del bucket. |
 
 Copia `.env.example` y rellénalo. Nunca subas `.env` al repositorio.
 
@@ -79,27 +76,24 @@ server {
 
 Certificado con `certbot --nginx -d alta.vuestrodominio.com`.
 
-## 7. Dependencias de la plataforma Manus
+## 7. Acceso al CRM
 
-Tres piezas del código están escritas contra servicios de Manus. En vuestro dominio hay que decidir
-qué hacer con ellas:
+El CRM no depende de ningún servicio externo: las cuentas viven en la tabla `users` de MySQL.
 
-1. **Login del CRM** (`/admin`): usa Manus OAuth con `redirectUri = https://vuestro-dominio/api/oauth/callback`.
-   Funciona si la app OAuth acepta ese dominio; si no, hay que sustituirlo por vuestro proveedor
-   (Google Workspace, email+contraseña, etc.). La web pública no necesita login.
-2. **Object storage** (`server/storage.ts`): usa el endpoint de Forge con `MANUS_API_KEY`. Para
-   vuestro dominio lo natural es sustituirlo por S3 (AWS, Cloudflare R2, Backblaze) cambiando solo
-   ese módulo.
-3. **MySQL**: cualquiera vale; solo hay que apuntar `DATABASE_URL`.
+1. Define `CRM_SETUP_TOKEN` (cadena aleatoria) en el servicio.
+2. Abre `https://vuestro-dominio/admin`: mientras no haya administrador aparece el formulario
+   «Crea el primer administrador». Introduce el código, tu email y una contraseña (12+ caracteres).
+3. Desde el panel **Equipo** del CRM puedes dar o quitar acceso a otras personas y cambiar tu
+   contraseña. Recuerda que para leer los expedientes cada persona necesita además la clave privada.
 
-Si quieres, preparo la variante con login propio (Google o email+contraseña) y storage S3 para que el
-CRM funcione sin depender de Manus.
+Si se pierde el acceso de todos los administradores, borra sus filas de `users` en MySQL y repite el
+paso 2 con un `CRM_SETUP_TOKEN` nuevo.
 
 ## 8. Checklist antes de abrir al público
 
-- [ ] HTTPS activo y `client_max_body_size` ≥ 80 MB en el proxy.
-- [ ] `MANUS_JWT_SECRET` único y guardado en el gestor de secretos.
+- [ ] HTTPS activo y `client_max_body_size` ≥ 50 MB en el proxy (si usas uno propio).
+- [ ] `SESSION_SECRET` único y guardado en el gestor de secretos.
+- [ ] Primer administrador creado; después puedes borrar `CRM_SETUP_TOKEN`.
 - [ ] Clave privada JWK fuera del servidor (la usa el navegador del operador, no el backend).
 - [ ] Copias de seguridad de MySQL y del bucket de storage.
 - [ ] Política de retención aplicada (12 meses para solicitudes no tramitadas).
-- [ ] Un solo administrador de confianza; el resto de cuentas, sin rol.

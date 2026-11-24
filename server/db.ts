@@ -1,7 +1,6 @@
-import { eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import { users, type User } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -18,74 +17,76 @@ export async function getDb() {
   return _db;
 }
 
-export async function upsertUser(user: InsertUser): Promise<void> {
-  if (!user.openId) {
-    throw new Error("User openId is required for upsert");
-  }
-
+async function requireDb() {
   const db = await getDb();
-  if (!db) {
-    throw new Error("Database is not available");
-  }
-
-  try {
-    const values: InsertUser = {
-      openId: user.openId,
-    };
-    const updateSet: Record<string, unknown> = {};
-
-    const textFields = ["name", "email", "loginMethod"] as const;
-    type TextField = (typeof textFields)[number];
-
-    const assignNullable = (field: TextField) => {
-      const value = user[field];
-      if (value === undefined) return;
-      const normalized = value ?? null;
-      values[field] = normalized;
-      updateSet[field] = normalized;
-    };
-
-    textFields.forEach(assignNullable);
-
-    if (user.lastSignedIn !== undefined) {
-      values.lastSignedIn = user.lastSignedIn;
-      updateSet.lastSignedIn = user.lastSignedIn;
-    }
-    if (user.role !== undefined) {
-      values.role = user.role;
-      updateSet.role = user.role;
-    } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
-    }
-
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = new Date();
-    }
-
-    if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = new Date();
-    }
-
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
-  } catch (error) {
-    console.error("[Database] Failed to upsert user:", error);
-    throw error;
-  }
+  if (!db) throw new Error("Database is not available");
+  return db;
 }
 
-export async function getUserByOpenId(openId: string) {
-  const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
-    return undefined;
-  }
-
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
-
-  return result.length > 0 ? result[0] : undefined;
+export async function getUserById(id: number): Promise<User | undefined> {
+  const db = await requireDb();
+  const rows = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  return rows[0];
 }
 
-// TODO: add feature queries here as your schema grows.
+export async function getUserByEmail(email: string): Promise<User | undefined> {
+  const db = await requireDb();
+  const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return rows[0];
+}
+
+export async function listUsers(): Promise<User[]> {
+  const db = await requireDb();
+  return db.select().from(users).orderBy(asc(users.createdAt));
+}
+
+export async function countAdmins(): Promise<number> {
+  const db = await requireDb();
+  const rows = await db
+    .select({ n: sql<number>`count(*)` })
+    .from(users)
+    .where(eq(users.role, "admin"));
+  return Number(rows[0]?.n ?? 0);
+}
+
+export async function createUser(values: {
+  email: string;
+  name: string | null;
+  passwordHash: string;
+  role: "admin" | "user";
+}): Promise<User> {
+  const db = await requireDb();
+  await db.insert(users).values({
+    openId: `email:${values.email}`.slice(0, 64),
+    email: values.email,
+    name: values.name,
+    loginMethod: "password",
+    role: values.role,
+    passwordHash: values.passwordHash,
+  });
+  const created = await getUserByEmail(values.email);
+  if (!created) throw new Error("User was not created");
+  return created;
+}
+
+/** Cambia la contraseña e invalida todas las sesiones abiertas del usuario. */
+export async function setPassword(id: number, passwordHash: string): Promise<User> {
+  const db = await requireDb();
+  await db
+    .update(users)
+    .set({ passwordHash, sessionVersion: sql`${users.sessionVersion} + 1` })
+    .where(eq(users.id, id));
+  const updated = await getUserById(id);
+  if (!updated) throw new Error("User not found");
+  return updated;
+}
+
+export async function touchSignIn(id: number): Promise<void> {
+  const db = await requireDb();
+  await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, id));
+}
+
+export async function deleteUser(id: number): Promise<void> {
+  const db = await requireDb();
+  await db.delete(users).where(eq(users.id, id));
+}

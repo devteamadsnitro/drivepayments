@@ -13,8 +13,11 @@ CREATE TABLE IF NOT EXISTS `users` (
   `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `lastSignedIn` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `passwordHash` varchar(255) DEFAULT NULL,
+  `sessionVersion` int NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,
-  UNIQUE KEY `users_openId_unique` (`openId`)
+  UNIQUE KEY `users_openId_unique` (`openId`),
+  UNIQUE KEY `users_email_unique` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=360001;
 
 CREATE TABLE IF NOT EXISTS `leads` (

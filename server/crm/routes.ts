@@ -6,15 +6,9 @@ import express, {
   type Response,
 } from "express";
 import { nanoid } from "nanoid";
-import { COOKIE_NAME } from "@shared/const";
-import {
-  LEAD_STATUSES,
-  type LeadStatus,
-  type User,
-} from "../../drizzle/schema";
-import { getSessionCookieOptions } from "../_core/cookies";
-import { sdk } from "../_core/sdk";
+import { LEAD_STATUSES, type LeadStatus } from "../../drizzle/schema";
 import { storageGetSignedUrl, storagePut } from "../storage";
+import { registerAuthRoutes, requireAdmin, type AuthedRequest } from "./auth";
 import {
   clientIp,
   createRateLimiter,
@@ -27,12 +21,10 @@ import * as store from "./store";
  * API del CRM.
  *
  * - `POST /api/submissions` es público: recibe el sobre cifrado del formulario.
- * - El resto exige una sesión de Manus con rol de administrador.
+ * - El resto exige una sesión del CRM (email + contraseña) con rol de administrador.
  * - El servidor nunca ve datos personales: solo guarda el sobre cifrado y un
  *   resumen también cifrado que permite listar expedientes sin descifrarlos.
  */
-
-type AuthedRequest = Request & { crmUser?: User };
 
 const REFERENCE_PATTERN = /^DP-\d{4}-[A-Z0-9]{4}$/;
 // El cliente limita los adjuntos a 30 MB (tras optimizar las fotos); en base64
@@ -42,39 +34,6 @@ const MAX_DOCUMENT_BYTES = 30 * 1024 * 1024;
 const MAX_SUMMARY_BYTES = 16 * 1024;
 
 const submitLimiter = createRateLimiter({ windowMs: 60 * 60 * 1000, max: 12 });
-
-async function currentUser(req: Request): Promise<User | null> {
-  try {
-    return (await sdk.authenticateRequest(req)) as User;
-  } catch {
-    return null;
-  }
-}
-
-/** El primer usuario autenticado se convierte en administrador si aún no hay ninguno. */
-async function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  const user = await currentUser(req);
-  if (!user) {
-    res.status(401).json({ error: "Inicia sesión para acceder al CRM." });
-    return;
-  }
-  if (user.role !== "admin") {
-    try {
-      if (!(await store.hasAdmin())) {
-        await store.promoteToAdmin(user.id);
-        user.role = "admin";
-      }
-    } catch (error) {
-      console.error("[CRM] No se pudo comprobar el administrador:", error);
-    }
-  }
-  if (user.role !== "admin") {
-    res.status(403).json({ error: "Esta cuenta no tiene acceso al CRM." });
-    return;
-  }
-  (req as AuthedRequest).crmUser = user;
-  next();
-}
 
 /**
  * Protección CSRF: las escrituras exigen una cabecera propia. Un formulario
@@ -253,29 +212,7 @@ export function registerCrmRoutes(app: Express) {
     })
   );
 
-  api.get(
-    "/crm/session",
-    handle(async (req, res) => {
-      const user = await currentUser(req);
-      const adminExists = user ? true : await store.hasAdmin();
-      res.set("Cache-Control", "no-store").json({
-        user: user
-          ? { name: user.name, email: user.email, role: user.role }
-          : null,
-        canAccess: Boolean(user && (user.role === "admin" || !adminExists)),
-        adminExists,
-      });
-    })
-  );
-
-  api.post(
-    "/crm/logout",
-    guardWrite,
-    handle(async (req, res) => {
-      res.clearCookie(COOKIE_NAME, getSessionCookieOptions(req));
-      res.json({ ok: true });
-    })
-  );
+  registerAuthRoutes(api, { guardWrite, handle });
 
   api.get(
     "/crm/leads",

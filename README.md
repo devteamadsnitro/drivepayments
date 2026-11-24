@@ -20,9 +20,8 @@ pnpm build          # cliente en dist/public + servidor en dist/index.js
 pnpm start          # servidor de producción (NODE_ENV=production)
 ```
 
-`pnpm dev` y `pnpm start` necesitan `DATABASE_URL` (MySQL gestionada del proyecto). El resto de
-variables las inyecta la plataforma: `MANUS_API_URL`/`MANUS_API_KEY` para storage, el secreto de
-sesión para firmar cookies y las credenciales OAuth para el login Manus.
+`pnpm dev` y `pnpm start` necesitan `DATABASE_URL` (MySQL), `SESSION_SECRET` y las variables
+`S3_*` del bucket. Ver `.env.example` y `DEPLOY.md`.
 
 ## Estructura
 
@@ -58,8 +57,9 @@ sesión para firmar cookies y las credenciales OAuth para el login Manus.
 
 ## Acceso al CRM
 
-`/admin` exige sesión de Manus. El **primer usuario autenticado se convierte en administrador**; a
-partir de ahí solo los usuarios con rol `admin` entran. El administrador debe cargar su clave privada
+`/admin` exige email y contraseña. Mientras no exista ningún administrador, la pantalla de acceso
+muestra el alta del primero, protegida por el código `CRM_SETUP_TOKEN`; después ese formulario
+desaparece y los administradores dan o quitan acceso al equipo desde el panel **Equipo**. El administrador debe cargar su clave privada
 (`private-key.jwk.json`) en la pantalla de desbloqueo: se guarda en `sessionStorage`, se valida contra
 la clave pública publicada y nunca se envía al servidor. Desde el panel se puede buscar y filtrar,
 cambiar el estado, escribir notas internas cifradas, previsualizar o descargar documentos, exportar el
@@ -70,9 +70,9 @@ expediente en ZIP y archivar solicitudes.
 | Variable | Uso |
 | --- | --- |
 | `DATABASE_URL` | Conexión MySQL (la proporciona la plataforma). |
-| `MANUS_API_URL`, `MANUS_API_KEY` | Object storage y servicios de la plataforma. |
-| `MANUS_JWT_SECRET` / secreto de sesión | Firma de la cookie `webdev_app_session` y clave de las notas internas. |
-| `VITE_OAUTH_PORTAL_URL`, `VITE_APP_ID` | Login Manus del CRM. |
+| `S3_BUCKET`, `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Bucket S3-compatible (Railway Bucket). |
+| `SESSION_SECRET` | Firma de la cookie `dp_crm_session` y clave de las notas internas. No cambiarlo. |
+| `CRM_SETUP_TOKEN` | Código de un solo uso para crear el primer administrador del CRM. |
 
 ## Rutas
 

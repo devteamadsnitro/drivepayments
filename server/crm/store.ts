@@ -155,23 +155,6 @@ export async function stats() {
 }
 
 /** ¿Hay algún administrador dado de alta? Se usa solo para el primer acceso. */
-export async function hasAdmin(): Promise<boolean> {
-  const database = await db();
-  const [row] = await database
-    .select({ count: sql<number>`count(*)` })
-    .from(users)
-    .where(eq(users.role, "admin"));
-  return Number(row?.count ?? 0) > 0;
-}
-
-export async function promoteToAdmin(userId: number) {
-  const database = await db();
-  await database
-    .update(users)
-    .set({ role: "admin" })
-    .where(eq(users.id, userId));
-}
-
 /** Archivar es un cambio de estado; el sobre cifrado permanece intacto. */
 export async function archiveAll(status: LeadStatus) {
   const database = await db();

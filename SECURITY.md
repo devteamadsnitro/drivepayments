@@ -36,13 +36,17 @@ operador con la misma clave privada.
 
 ## 3. Acceso al CRM
 
-- **Autenticación**: sesión de Manus (cookie `webdev_app_session`, `HttpOnly`, `SameSite=None`,
-  `Secure`). El servidor valida la firma y carga el usuario.
-- **Autorización**: solo el rol `admin`. El **primer usuario que inicia sesión se convierte en
-  administrador** (bootstrap); después, un usuario sin rol admin recibe 403 y no ve expedientes.
+- **Autenticación**: email y contraseña. Contraseñas con scrypt (N=2^15, r=8, p=1, sal de 16 bytes),
+  mínimo 12 caracteres. Sesión de 12 h en la cookie `dp_crm_session` (`HttpOnly`, `Secure`,
+  `SameSite=Strict`) firmada con `SESSION_SECRET`. Cambiar la contraseña o retirar el acceso invalida
+  todas las sesiones abiertas de esa persona.
+- **Intentos de acceso**: máximo 20 por IP y 6 por email cada 15 minutos; los fallos se registran.
+- **Alta del primer administrador**: solo mientras no hay ninguno y con el código `CRM_SETUP_TOKEN`.
+  Después, solo un administrador puede dar acceso a otra persona.
+- **Autorización**: solo el rol `admin`; un usuario sin ese rol recibe 403 y no ve expedientes.
 - **CSRF**: todas las escrituras exigen la cabecera `x-crm-request`; el cliente la envía siempre. Las
   respuestas del CRM van con `Cache-Control: no-store`.
-- **Rate limit**: 12 envíos por hora e IP en el endpoint público; límite de cuerpo de 70 MB.
+- **Rate limit**: 12 envíos por hora e IP en el endpoint público; límite de cuerpo de 46 MB.
 - **Clave privada**: se carga en `/admin`, se guarda en `sessionStorage` y se valida contra la clave
   pública configurada (huella SHA-256 del módulo). Nunca se envía al servidor ni se escribe en disco.
 - **Notas internas**: se cifran en el servidor con AES-256-GCM usando una clave derivada por HKDF del
