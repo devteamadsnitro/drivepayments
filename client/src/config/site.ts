@@ -48,9 +48,17 @@ export const siteConfig = {
       key_ops: ["encrypt"],
     } satisfies JsonWebKey,
 
-    /** Límites de los documentos adjuntos. */
-    maxFileBytes: 10 * 1024 * 1024,
-    maxTotalBytes: 40 * 1024 * 1024,
+    /**
+     * Límites de los documentos adjuntos (se aplican después de optimizar).
+     * Las fotos se reescalan en el navegador antes de cifrarlas: el lado mayor
+     * queda en `maxImageDimension` px (legible para DNI, cheques y extractos) y
+     * se recodifican en JPEG con calidad `imageQuality`. Los PDF no se modifican.
+     */
+    maxFileBytes: 10 * 1024 * 1024, // PDF
+    maxImageBytes: 3 * 1024 * 1024, // imagen ya optimizada
+    maxTotalBytes: 30 * 1024 * 1024,
+    maxImageDimension: 2400,
+    imageQuality: 0.82,
     acceptedMimeTypes: [
       "application/pdf",
       "image/jpeg",

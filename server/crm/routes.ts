@@ -35,7 +35,10 @@ import * as store from "./store";
 type AuthedRequest = Request & { crmUser?: User };
 
 const REFERENCE_PATTERN = /^DP-\d{4}-[A-Z0-9]{4}$/;
-const MAX_ENVELOPE_BYTES = 70 * 1024 * 1024;
+// El cliente limita los adjuntos a 30 MB (tras optimizar las fotos); en base64
+// dentro del sobre cifrado eso ocupa ~41 MB. Margen pequeño por encima.
+const MAX_ENVELOPE_BYTES = 45 * 1024 * 1024;
+const MAX_DOCUMENT_BYTES = 30 * 1024 * 1024;
 const MAX_SUMMARY_BYTES = 16 * 1024;
 
 const submitLimiter = createRateLimiter({ windowMs: 60 * 60 * 1000, max: 12 });
@@ -133,7 +136,7 @@ function parseEnvelope(
   if (!Number.isFinite(docCount) || docCount < 0 || docCount > 60) {
     return { ok: false, error: "Número de documentos no válido." };
   }
-  if (!Number.isFinite(sizeBytes) || sizeBytes < 0) {
+  if (!Number.isFinite(sizeBytes) || sizeBytes < 0 || sizeBytes > MAX_DOCUMENT_BYTES) {
     return { ok: false, error: "Tamaño de expediente no válido." };
   }
   let summary: ParsedEnvelope["summary"] = null;

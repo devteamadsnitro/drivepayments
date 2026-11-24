@@ -238,7 +238,8 @@ export async function submitApplication(
 
   onProgress?.("Enviando por canal cifrado");
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
+  // Hasta ~41 MB cifrados: margen para conexiones móviles lentas.
+  const timeout = setTimeout(() => controller.abort(), 120000);
 
   try {
     const response = await fetch(endpoint, {

@@ -16,12 +16,14 @@ export function DocumentPanel({
   onAdd,
   onRemove,
   error,
+  busy = false,
   onDismissError,
 }: {
   documents: DocumentMap;
-  onAdd: (slot: string, files: FileList | File[]) => void;
+  onAdd: (slot: string, files: FileList | File[]) => void | Promise<void>;
   onRemove: (slot: string, documentId: string) => void;
   error: string | null;
+  busy?: boolean;
   onDismissError: () => void;
 }) {
   const [dragging, setDragging] = React.useState<string | null>(null);
@@ -92,7 +94,7 @@ export function DocumentPanel({
             o usa «Adjuntar» en cada documento
           </p>
           <p className="mt-2 font-mono text-[9px] tracking-[0.08em] text-ink-muted/80 uppercase">
-            PDF · JPG · PNG · HEIC — máx. 10 MB
+            PDF máx. {siteConfig.submission.maxFileBytes / (1024 * 1024)} MB · fotos optimizadas automáticamente
           </p>
           <input
             ref={zoneInputRef}
@@ -107,6 +109,19 @@ export function DocumentPanel({
             }}
           />
         </div>
+
+        {busy ? (
+          <p
+            role="status"
+            className="mt-3 flex items-center gap-2 rounded-lg border border-line bg-paper px-2.5 py-2 text-[11px] text-ink-muted"
+          >
+            <span
+              className="size-3 animate-spin rounded-full border-2 border-line border-t-ink"
+              aria-hidden="true"
+            />
+            Optimizando imágenes…
+          </p>
+        ) : null}
 
         {error ? (
           <div

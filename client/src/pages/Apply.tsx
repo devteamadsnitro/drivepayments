@@ -22,6 +22,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { siteConfig } from "@/config/site";
 import { publicKeyFingerprint, type EncryptedEnvelope } from "@/lib/crypto";
+import { isImageFile, optimizeImage } from "@/lib/imageOptimize";
 import {
   countDocuments,
   countRequiredFulfilled,
@@ -214,6 +215,10 @@ export default function Apply() {
   const [errors, setErrors] = React.useState<Errors>({});
   const [formNotice, setFormNotice] = React.useState<string | null>(null);
   const [docError, setDocError] = React.useState<string | null>(null);
+  const [docBusy, setDocBusy] = React.useState(false);
+  // Estado más reciente para los manejadores asíncronos (la optimización tarda).
+  const stateRef = React.useRef(state);
+  stateRef.current = state;
   const [mobileDocsOpen, setMobileDocsOpen] = React.useState(false);
   const [status, setStatus] = React.useState<"idle" | "submitting" | "success">("idle");
   const [progressMessage, setProgressMessage] = React.useState("Preparando el expediente");
@@ -292,33 +297,56 @@ export default function Apply() {
     clearErrorsFor(Object.keys(patch).map((key) => `processing.${key}`));
   };
 
-  const addDocuments = (slot: string, files: FileList | File[]) => {
+  const addDocuments = async (slot: string, files: FileList | File[]) => {
     const list = Array.from(files);
-    const accepted = siteConfig.submission.acceptedMimeTypes as readonly string[];
-    const maxFile = siteConfig.submission.maxFileBytes;
-    const maxTotal = siteConfig.submission.maxTotalBytes;
+    const { acceptedMimeTypes, maxFileBytes, maxImageBytes, maxTotalBytes } = siteConfig.submission;
+    const accepted = acceptedMimeTypes as readonly string[];
+    const mb = (bytes: number) => `${Math.round(bytes / (1024 * 1024))} MB`;
 
     const valid: DocumentMap[string] = [];
     const rejected: string[] = [];
 
-    for (const file of list) {
-      const extensionOk = /\.(pdf|jpe?g|png|heic|heif|webp)$/i.test(file.name);
-      const mimeOk = !file.type || accepted.includes(file.type);
-      if (!extensionOk && !mimeOk) {
-        rejected.push(`${file.name}: formato no admitido`);
-        continue;
+    setDocBusy(true);
+    setDocError(null);
+    try {
+      for (const original of list) {
+        const extensionOk = /\.(pdf|jpe?g|png|heic|heif|webp)$/i.test(original.name);
+        const mimeOk = !original.type || accepted.includes(original.type);
+        if (!extensionOk && !mimeOk) {
+          rejected.push(`${original.name}: formato no admitido`);
+          continue;
+        }
+
+        if (!isImageFile(original)) {
+          if (original.size > maxFileBytes) {
+            rejected.push(`${original.name}: el PDF supera los ${mb(maxFileBytes)}`);
+            continue;
+          }
+          valid.push({ id: uid(), file: original });
+          continue;
+        }
+
+        const { file, undecodable } = await optimizeImage(original);
+        if (file.size > maxImageBytes) {
+          rejected.push(
+            undecodable
+              ? `${original.name}: imagen demasiado pesada y este navegador no puede optimizarla. Súbela en JPG o PNG.`
+              : `${original.name}: la imagen sigue superando los ${mb(maxImageBytes)} tras optimizarla`,
+          );
+          continue;
+        }
+        valid.push({ id: uid(), file });
       }
-      if (file.size > maxFile) {
-        rejected.push(`${file.name}: supera los 10 MB`);
-        continue;
-      }
-      valid.push({ id: uid(), file });
+    } finally {
+      setDocBusy(false);
     }
 
-    const currentTotal = totalDocumentBytes(state);
+    const currentTotal = totalDocumentBytes(stateRef.current);
     const addedTotal = valid.reduce((sum, item) => sum + item.file.size, 0);
-    if (currentTotal + addedTotal > maxTotal) {
-      setDocError("El expediente supera los 40 MB. Envíanos los documentos restantes por Telegram.");
+    if (currentTotal + addedTotal > maxTotalBytes) {
+      setDocError(
+        `El expediente supera los ${mb(maxTotalBytes)}. Envíanos los documentos restantes por Telegram.`,
+      );
       return;
     }
 
@@ -398,7 +426,7 @@ export default function Apply() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (status === "submitting") return;
+    if (status === "submitting" || docBusy) return;
 
     const steps: StepId[] = [1, 2, 3, 4];
     const firstInvalid = steps.find((item) => Object.keys(validateStep(item, state)).length > 0);
@@ -686,7 +714,7 @@ export default function Apply() {
                           ) : (
                             <button
                               type="submit"
-                              disabled={status === "submitting"}
+                              disabled={status === "submitting" || docBusy}
                               className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-accent px-5 text-[13.5px] font-semibold text-ink transition-all hover:bg-accent-deep disabled:opacity-70 sm:flex-none"
                             >
                               <Lock className="size-3.5" />
@@ -766,6 +794,7 @@ export default function Apply() {
                       onAdd={addDocuments}
                       onRemove={removeDocument}
                       error={docError}
+                      busy={docBusy}
                       onDismissError={() => setDocError(null)}
                     />
                       <HelpCard />

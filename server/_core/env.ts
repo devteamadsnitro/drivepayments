@@ -9,4 +9,11 @@ export const ENV = {
   get isProduction() { return process.env.NODE_ENV === "production"; },
   get forgeApiUrl() { return process.env.MANUS_API_URL ?? ""; },
   get forgeApiKey() { return process.env.MANUS_API_KEY ?? ""; },
+  // Object storage (Railway Bucket / any S3-compatible provider)
+  get s3Bucket() { return process.env.S3_BUCKET ?? ""; },
+  get s3Endpoint() { return process.env.S3_ENDPOINT ?? ""; },
+  get s3Region() { return process.env.S3_REGION ?? ""; },
+  get s3AccessKeyId() { return process.env.S3_ACCESS_KEY_ID ?? ""; },
+  get s3SecretAccessKey() { return process.env.S3_SECRET_ACCESS_KEY ?? ""; },
+  get s3ForcePathStyle() { return process.env.S3_FORCE_PATH_STYLE === "true"; },
 };
