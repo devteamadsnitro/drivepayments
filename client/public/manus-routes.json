@@ -1,0 +1,20 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "title": "Alta de comercio"
+    },
+    {
+      "path": "/privacidad",
+      "title": "Política de privacidad"
+    },
+    {
+      "path": "/404",
+      "title": "Página no encontrada"
+    },
+    {
+      "path": "/admin",
+      "title": "CRM de expedientes"
+    }
+  ]
+}

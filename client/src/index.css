@@ -1,0 +1,287 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+/* ============================================================
+   DrivePayments — sistema de marca
+   Cambia aquí los colores de marca: se propagan a toda la web.
+   ============================================================ */
+@theme {
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-ink: #0b0e12;
+  --color-ink-soft: #171c23;
+  --color-ink-muted: #5c626b;
+  --color-paper: #f4f2ec;
+  --color-paper-deep: #eae7dd;
+  --color-surface: #ffffff;
+  --color-line: #e2ded3;
+  --color-line-strong: #c8c2b2;
+  --color-accent: #c9f24d;
+  --color-accent-deep: #a6cf28;
+  --color-accent-soft: #effac6;
+  --color-danger: #b3351d;
+  --color-danger-soft: #fdf0ec;
+  --color-ok: #1b7a4b;
+
+  --radius-4xl: 1.5rem;
+  --shadow-card: 0 1px 1px rgba(11, 14, 18, 0.03), 0 18px 40px -28px rgba(11, 14, 18, 0.35);
+  --shadow-lift: 0 1px 2px rgba(11, 14, 18, 0.04), 0 26px 60px -32px rgba(11, 14, 18, 0.45);
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: #f4f2ec;
+  --foreground: #0b0e12;
+  --card: #ffffff;
+  --card-foreground: #0b0e12;
+  --popover: #ffffff;
+  --popover-foreground: #0b0e12;
+  --primary: #0b0e12;
+  --primary-foreground: #f7f6f1;
+  --secondary: #eae7dd;
+  --secondary-foreground: #171c23;
+  --muted: #eae7dd;
+  --muted-foreground: #5c626b;
+  --accent: #c9f24d;
+  --accent-foreground: #0b0e12;
+  --destructive: #b3351d;
+  --destructive-foreground: #ffffff;
+  --border: #e2ded3;
+  --input: #d8d3c6;
+  --ring: #0b0e12;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01" on, "cv01" on;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer components {
+  /* Campos de formulario */
+  .field-input {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-line);
+    background-color: #fff;
+    padding: 0.625rem 0.875rem;
+    font-size: 15px;
+    line-height: 1.4;
+    color: var(--color-ink);
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      background-color 0.15s ease;
+  }
+
+  .field-input::placeholder {
+    color: color-mix(in oklab, var(--color-ink-muted) 62%, white);
+  }
+
+  .field-input:hover:not(:disabled) {
+    border-color: var(--color-line-strong);
+  }
+
+  .field-input:focus {
+    outline: none;
+    border-color: var(--color-ink);
+    box-shadow: 0 0 0 3px rgba(11, 14, 18, 0.08);
+  }
+
+  .field-input[aria-invalid="true"] {
+    border-color: color-mix(in oklab, var(--color-danger) 55%, white);
+    background-color: color-mix(in oklab, var(--color-danger-soft) 55%, white);
+  }
+
+  .field-input[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 3px rgba(179, 53, 29, 0.12);
+  }
+
+  .field-input:disabled {
+    background-color: var(--color-paper);
+    color: var(--color-ink-muted);
+    cursor: not-allowed;
+  }
+
+  select.field-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235c626b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2.25rem;
+    cursor: pointer;
+  }
+
+  /* Etiquetas mono de sección */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  /* Patrón de rejilla fina para la cabecera */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(11, 14, 18, 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(11, 14, 18, 0.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .link-underline {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+    transition: text-decoration-color 0.15s ease;
+  }
+
+  .link-underline:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(201, 242, 77, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(201, 242, 77, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(201, 242, 77, 0);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.animate-step-in {
+  animation: step-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2.4s ease-out infinite;
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-accent) 0%, transparent) 0%,
+    color-mix(in oklab, var(--color-accent) 55%, transparent) 50%,
+    color-mix(in oklab, var(--color-accent) 0%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Scrollbar discreto */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}

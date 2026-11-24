@@ -1,0 +1,1 @@
+ALTER TABLE `leads` ADD `wrappedKey` varchar(1024);
