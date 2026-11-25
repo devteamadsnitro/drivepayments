@@ -27,6 +27,7 @@ import {
   countDocuments,
   countRequiredFulfilled,
   createReference,
+  partnerConsentText,
   submitApplication,
   totalDocumentBytes,
   type DeliveryOutcome,
@@ -116,6 +117,7 @@ const initialState: ApplicationState = {
   },
   documents: {},
   consent: false,
+  partnerConsent: false,
 };
 
 const createInitialState = (): ApplicationState => ({
@@ -483,7 +485,7 @@ export default function Apply() {
       setFormNotice(
         firstInvalid === 4
           ? tr(
-              "Falta aceptar el tratamiento de datos o completar el perfil de procesamiento.",
+              "Falta aceptar las condiciones de tratamiento de datos o completar el perfil de procesamiento.",
               "You still need to accept the data processing terms or complete the processing profile.",
             )
           : tr(
@@ -735,6 +737,18 @@ export default function Apply() {
                               "y autorizo a DrivePayments a tratar estos datos y los documentos adjuntos para tramitar el alta con el procesador y el banco adquirente.",
                               "and authorize DrivePayments to process this data and the attached documents to complete onboarding with the processor and the acquiring bank.",
                             )}
+                          </CheckboxLine>
+
+                          <CheckboxLine
+                            id="partnerConsent"
+                            checked={state.partnerConsent}
+                            onChange={(checked) => {
+                              setState((current) => ({ ...current, partnerConsent: checked }));
+                              clearErrorsFor(["partnerConsent"]);
+                            }}
+                            error={errors["partnerConsent"]}
+                          >
+                            {partnerConsentText()}
                           </CheckboxLine>
                         </div>
                       ) : null}

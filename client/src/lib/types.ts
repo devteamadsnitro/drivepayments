@@ -87,6 +87,8 @@ export interface ApplicationState {
   processing: ProcessingInfo;
   documents: DocumentMap;
   consent: boolean;
+  /** Sharing with partners and opening gateways on the merchant's behalf. */
+  partnerConsent: boolean;
 }
 
 export type Errors = Record<string, string>;

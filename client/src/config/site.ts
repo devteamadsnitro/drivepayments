@@ -77,7 +77,7 @@ export const siteConfig = {
   },
 
   legal: {
-    privacyVersion: "24 de noviembre de 2026",
+    privacyVersion: "25 de noviembre de 2026",
     entity: "DrivePayments",
     get jurisdiction() {
       return tr("España / Estados Unidos", "Spain / United States");

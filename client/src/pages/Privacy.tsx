@@ -19,7 +19,7 @@ const getSections = () => [
 /** Fecha de la versión vigente (la misma en ambos idiomas). */
 const versionLabel = () =>
   getLang() === "en" ? PRIVACY_VERSION_EN : siteConfig.legal.privacyVersion;
-const PRIVACY_VERSION_EN = "November 24, 2026";
+const PRIVACY_VERSION_EN = "November 25, 2026";
 
 export default function Privacy() {
   const sections = getSections();
@@ -236,9 +236,11 @@ function PrivacyArticleEs() {
           05 · Con quién los compartimos
         </h2>
         <p className="mt-2.5">
-          Remitimos el expediente únicamente a: el procesador de pagos y el banco adquirente
-          que evalúan el alta; los proveedores de verificación de identidad y prevención del
-          fraude que intervienen en el proceso; y, cuando exista una obligación legal, a las
+          Con tu consentimiento expreso, compartimos el expediente con nuestros socios para abrir
+          pasarelas de pago en nombre de tu empresa: procesadores de pago, bancos adquirentes y
+          proveedores de pasarelas de pago que evalúan y gestionan el alta. También lo
+          compartimos con los proveedores de verificación de identidad y prevención del fraude
+          que intervienen en el proceso y, cuando exista una obligación legal, con las
           autoridades competentes. Todos ellos actúan bajo contrato de encargo o como
           responsables independientes con sus propias políticas.
         </p>
@@ -456,8 +458,10 @@ function PrivacyArticleEn() {
           05 · Who we share it with
         </h2>
         <p className="mt-2.5">
-          We send the application only to: the payment processor and acquiring bank evaluating the
-          onboarding; the identity verification and fraud prevention providers involved in the
+          With your express consent, we share the application with our partners in order to open
+          payment gateways on behalf of your business: payment processors, acquiring banks and
+          payment gateway providers that evaluate and manage the onboarding. We also share it with the
+          identity verification and fraud prevention providers involved in the
           process; and, where there is a legal obligation, the competent authorities. All of them
           act under a data processing agreement or as independent controllers with their own
           policies.

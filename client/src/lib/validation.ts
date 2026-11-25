@@ -228,6 +228,12 @@ export function validateStep(step: StepId, app: ApplicationState): Errors {
   if (step === 4 && !app.consent) {
     errors["consent"] = tr("Debes aceptar el tratamiento de datos para enviar la solicitud.", "You must accept the data processing terms to submit the application.");
   }
+  if (step === 4 && !app.partnerConsent) {
+    errors["partnerConsent"] = tr(
+      "Debes aceptar que compartamos tus datos con nuestros socios y abramos las pasarelas en tu nombre.",
+      "You must agree that we share your data with our partners and open the gateways on your behalf.",
+    );
+  }
 
   return errors;
 }

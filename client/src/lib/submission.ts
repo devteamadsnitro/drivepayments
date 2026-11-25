@@ -5,6 +5,14 @@ import { onlyDigits } from "./validation";
 import type { ApplicationState } from "./types";
 import { getLang, tr } from "./i18n";
 
+/** Wording of the partner-sharing disclaimer. The form shows it and the payload stores it verbatim. */
+export function partnerConsentText(): string {
+  return tr(
+    "Acepto que DrivePayments trate los datos y documentos de esta solicitud y los comparta con sus socios (procesadores de pago, bancos adquirentes y proveedores de pasarelas de pago) para abrir pasarelas de pago en nombre de mi empresa.",
+    "I agree that DrivePayments may process the data and documents in this application and share them with its partners (payment processors, acquiring banks and payment gateway providers) in order to open payment gateways on behalf of my business.",
+  );
+}
+
 export interface SubmissionDocument {
   slot: string;
   slotLabel: string;
@@ -24,6 +32,10 @@ export interface ApplicationPayload {
     accepted: boolean;
     acceptedAt: string;
     privacyVersion: string;
+    /** Sharing with partners and opening gateways on the merchant's behalf. */
+    partnerSharing: boolean;
+    /** Exact wording the merchant accepted, in the language shown. */
+    partnerSharingText: string;
   };
   business: ApplicationState["business"] & {
     phoneFull: string;
@@ -111,6 +123,8 @@ export function buildPayload(state: ApplicationState, reference: string): Applic
       accepted: state.consent,
       acceptedAt: new Date().toISOString(),
       privacyVersion: siteConfig.legal.privacyVersion,
+      partnerSharing: state.partnerConsent,
+      partnerSharingText: partnerConsentText(),
     },
     business: {
       ...business,
